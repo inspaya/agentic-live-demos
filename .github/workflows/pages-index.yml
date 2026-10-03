@@ -1,0 +1,64 @@
+name: pages-index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*/**"
+      - index.html
+      - scripts/generate-index.py
+      - .github/workflows/pages-index.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Regenerate index.html
+        run: python3 scripts/generate-index.py
+      - name: Guard demo exports for Project-Pages subpath
+        run: python3 scripts/check-dist-paths.py
+      - name: Commit refreshed index.html
+        run: |
+          if ! git diff --quiet -- index.html; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "chore: regenerate index.html cards"
+            git push
+          fi
+
+  deploy:
+    needs: regenerate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ensure index.html is fresh
+        run: python3 scripts/generate-index.py --check || python3 scripts/generate-index.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,6 @@
+{
+  "title": "Danga QR Lead Generator",
+  "description": "Scan a Danga QR code, browse the portfolio and talk to a real agent on WhatsApp. QR scans unlock an automatic 5% discount.",
+  "thumbnail": "danga_qr_lead_generator_2026_10_02.png",
+  "entry": "dist/index.html"
+}
