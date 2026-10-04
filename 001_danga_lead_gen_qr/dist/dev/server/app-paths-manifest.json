@@ -1,6 +1,5 @@
 {
   "/l/[placement]/page": "app/l/[placement]/page.js",
-  "/offer/page": "app/offer/page.js",
-  "/privacy/page": "app/privacy/page.js",
+  "/page": "app/page.js",
   "/tools/qr/page": "app/tools/qr/page.js"
 }

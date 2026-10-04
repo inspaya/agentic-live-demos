@@ -1,6 +1,6 @@
 var RUNTIME_PUBLIC_PATH = "server/chunks/ssr/[turbopack]_runtime.js";
 var RELATIVE_ROOT_PATH = "..";
-var ASSET_PREFIX = "/_next/";
+var ASSET_PREFIX = "/agentic-live-demos/001_danga_lead_gen_qr/dist/_next/";
 // Apply forwarded globals from workerData if running in a worker thread
 if (typeof require !== 'undefined') {
     try {
