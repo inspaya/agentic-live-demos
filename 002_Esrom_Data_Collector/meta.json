@@ -1,0 +1,6 @@
+{
+  "title": "Esrom Data Collector",
+  "description": "Esrom Data Collector is an observer system that verifies security incidents around Nigeria's 2027 elections and codes each one for electoral linkage and actor conduct on a public, watermarked dashboard.",
+  "thumbnail": "002_Esrom_Data_Collector_2026_10_05.png",
+  "entry": "dist/index.html"
+}

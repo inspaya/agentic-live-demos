@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Esrom — Public Electoral Security Dashboard (W-4 demo)</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+  :root { --bg:#0f172a; --panel:#1e293b; --accent:#38bdf8; --danger:#f87171;
+          --warn:#fbbf24; --ok:#34d399; --muted:#94a3b8; --text:#e2e8f0; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         background:var(--bg); color:var(--text); font-size:14px; }
+  header { padding:12px 20px; background:#020617; border-bottom:2px solid var(--accent); }
+  header h1 { font-size:18px; }
+  header h1 span { color:var(--accent); }
+  .watermark { display:inline-block; margin-top:6px; padding:3px 10px; font-size:12px;
+    font-weight:700; background:#7c2d12; color:#fed7aa; border:1px solid #fb923c;
+    border-radius:4px; }
+  main { display:grid; grid-template-columns:1fr 360px; gap:12px; padding:12px 20px; }
+  #map { height:62vh; min-height:420px; border-radius:8px; border:1px solid #334155; }
+  .panel { background:var(--panel); border-radius:8px; padding:12px; border:1px solid #334155; }
+  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--muted); margin-bottom:8px; }
+  .filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .chip { padding:4px 10px; border-radius:20px; border:1px solid #475569; cursor:pointer;
+    background:transparent; color:var(--text); font-size:12px; }
+  .chip[aria-pressed="true"] { background:var(--accent); border-color:var(--accent);
+    color:#020617; font-weight:700; }
+  select { background:#0f172a; color:var(--text); border:1px solid #475569;
+    border-radius:6px; padding:5px 8px; font-size:12px; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+  .kpi { background:#0f172a; border-radius:6px; padding:8px; text-align:center; }
+  .kpi b { display:block; font-size:20px; }
+  .kpi small { color:var(--muted); }
+  #list { max-height:34vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+  .card { background:#0f172a; border-radius:6px; padding:8px 10px; border-left:4px solid var(--muted); }
+  .card.Direct { border-color:var(--danger); }
+  .card.Indirect { border-color:var(--warn); }
+  .card.Background { border-color:var(--muted); }
+  .card .meta { color:var(--muted); font-size:12px; margin-top:2px; }
+  .tag { display:inline-block; font-size:11px; padding:1px 7px; border-radius:10px;
+    background:#334155; margin-right:4px; }
+  table.matrix { width:100%; border-collapse:collapse; font-size:12px; }
+  table.matrix th, table.matrix td { border:1px solid #334155; padding:4px 6px; text-align:center; }
+  table.matrix th { background:#0f172a; color:var(--muted); font-weight:600; }
+  footer { padding:10px 20px; color:var(--muted); font-size:12px; border-top:1px solid #334155;
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  button.export { background:var(--accent); color:#020617; font-weight:700; border:none;
+    border-radius:6px; padding:6px 12px; cursor:pointer; font-size:12px; }
+  @media (max-width:900px){ main{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>Esrom</span> — Electoral Security Dashboard · Nigeria 2027</h1>
+  <div class="watermark">Observer Data — not official INEC results</div>
+</header>
+
+<main>
+  <div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2>Filters (mandate 2: electoral linkage)</h2>
+      <div class="filters" id="linkageChips" role="group" aria-label="Linkage class">
+        <button class="chip" data-link="all" aria-pressed="true">All</button>
+        <button class="chip" data-link="Direct" aria-pressed="false">Direct</button>
+        <button class="chip" data-link="Indirect" aria-pressed="false">Indirect</button>
+        <button class="chip" data-link="Background" aria-pressed="false">Background</button>
+      </div>
+      <div class="filters">
+        <select id="typeSel" aria-label="Incident type">
+          <option value="all">All types</option>
+          <option>VAC</option><option>BAL</option><option>VINT</option>
+          <option>INEC</option><option>ASSN</option><option>CLSH</option>
+          <option>SECF</option><option>VBUY</option><option>PROP</option><option>OTH</option>
+        </select>
+        <select id="stateSel" aria-label="State">
+          <option value="all">All states</option>
+          <option>Lagos</option><option>Kano</option><option>Rivers</option>
+        </select>
+        <button class="chip" id="histToggle" aria-pressed="false">2023 baseline overlay</button>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><b id="kTotal">0</b><small>verified incidents</small></div>
+        <div class="kpi"><b id="kDirect" style="color:var(--danger)">0</b><small>Direct linkage</small></div>
+        <div class="kpi"><b id="kActor" style="color:var(--accent)">0</b><small>actor-coded</small></div>
+        <div class="kpi"><b id="kPass" style="color:var(--warn)">0%</b><small>security passivity</small></div>
+      </div>
+    </div>
+    <div id="map" role="application" aria-label="Incident map of Nigeria"></div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2>Incidents (mandate 1: verified collection)</h2>
+      <div id="list"></div>
+    </div>
+    <div class="panel">
+      <h2>Actor × conduct matrix (mandate 3)</h2>
+      <table class="matrix" id="matrix"></table>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>Methodology: linkage = temporal(1–3) + geographic(1–3) + motive(1–3) → 7–9 Direct · 5–6 Indirect · 3–4 Background. Weights v1-draft.</span>
+  <button class="export" id="csvBtn">Export CSV</button>
+  <button class="export" id="geoBtn">Export GeoJSON</button>
+</footer>
+
+<script>
+// ---- Seed data: verified, publish-predicate-passing rows (C-2). GPS jittered demo values.
+const SEED = [
+ {id:"ESR-2027-000101", type:"VINT", severity:"coercive", state:"Lagos", lga:"Ikeja",
+  phase:"e-day-presidential", linkage:"Direct", sum:8, lat:6.6018, lon:3.3515,
+  actors:[["party-thug-unspecified","perpetrator"],["police","passive"]], passivity:true,
+  note:"Thugs blocking PU 012 entry; police present, no action.", hist:false},
+ {id:"ESR-2027-000102", type:"BAL", severity:"violent", state:"Rivers", lga:"Port Harcourt",
+  phase:"collation", linkage:"Direct", sum:9, lat:4.8156, lon:7.0498,
+  actors:[["party-thug-unspecified","perpetrator"],["voters","victim"]], passivity:false,
+  note:"Ballot box snatched at ward collation centre.", hist:false},
+ {id:"ESR-2027-000103", type:"INEC", severity:"violent", state:"Kano", lga:"Nassarawa",
+  phase:"pre-election", linkage:"Direct", sum:7, lat:12.0022, lon:8.5926,
+  actors:[["unidentified","perpetrator"],["INEC-official","victim"]], passivity:false,
+  note:"INEC office attacked overnight; materials burnt.", hist:false},
+ {id:"ESR-2027-000104", type:"VBUY", severity:"coercive", state:"Lagos", lga:"Surulere",
+  phase:"e-day-presidential", linkage:"Indirect", sum:6, lat:6.4998, lon:3.3500,
+  actors:[["party-agent","perpetrator"]], passivity:false,
+  note:"Cash + threats at booth queue.", hist:false},
+ {id:"ESR-2027-000105", type:"SECF", severity:"violent", state:"Rivers", lga:"Obio-Akpor",
+  phase:"e-day-governorship", linkage:"Direct", sum:7, lat:4.8447, lon:6.9939,
+  actors:[["police","perpetrator"],["voters","victim"]], passivity:false,
+  note:"Excessive force dispersing voters at PU 007.", hist:false},
+ {id:"ESR-2027-000106", type:"OTH", severity:"info", state:"Kano", lga:"Dala",
+  phase:"campaign", linkage:"Background", sum:3, lat:12.0422, lon:8.4900,
+  actors:[], passivity:false, note:"Banditry report 40km from nearest PU, no motive signal.", hist:false},
+ {id:"ESR-2027-000107", type:"CLSH", severity:"violent", state:"Lagos", lga:"Ikeja",
+  phase:"collation", linkage:"Direct", sum:8, lat:6.6100, lon:3.3600,
+  actors:[["party-supporter-APC","perpetrator"],["party-supporter-PDP","victim"],["military","intervener"]], passivity:false,
+  note:"Inter-party clash outside LGA collation centre; military dispersed.", hist:false},
+ // Historical 2023 baseline (excluded from G-metrics, visually distinct)
+ {id:"ESR-2023-009901", type:"VINT", severity:"coercive", state:"Lagos", lga:"Oshodi",
+  phase:"e-day-presidential", linkage:"Direct", sum:8, lat:6.5534, lon:3.3541,
+  actors:[["party-thug-unspecified","perpetrator"]], passivity:true, note:"2023 baseline.", hist:true},
+ {id:"ESR-2023-009902", type:"BAL", severity:"violent", state:"Rivers", lga:"Degema",
+  phase:"e-day-governorship", linkage:"Direct", sum:9, lat:4.7599, lon:6.7863,
+  actors:[["party-thug-unspecified","perpetrator"]], passivity:false, note:"2023 baseline.", hist:true}
+];
+const LINK_COLOR = {Direct:"#f87171", Indirect:"#fbbf24", Background:"#94a3b8"};
+const state = { link:"all", type:"all", st:"all", hist:false };
+
+const map = new maplibregl.Map({
+  container:"map",
+  style:"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+  center:[8.5, 9.5], zoom:5
+});
+map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+function filtered(){
+  return SEED.filter(r =>
+    (state.link==="all" || r.linkage===state.link) &&
+    (state.type==="all" || r.type===state.type) &&
+    (state.st==="all" || r.state===state.st) &&
+    (state.hist || !r.hist));
+}
+let markers = [];
+function render(){
+  const rows = filtered();
+  markers.forEach(m=>m.remove()); markers = [];
+  rows.forEach(r=>{
+    const el = document.createElement("div");
+    el.style.cssText = `width:14px;height:14px;border-radius:50%;cursor:pointer;opacity:${r.hist?0.45:1};`+
+      `background:${LINK_COLOR[r.linkage]};border:2px solid #0f172a;`;
+    el.title = `${r.id} · ${r.type} · ${r.linkage}`;
+    markers.push(new maplibregl.Marker({element:el}).setLngLat([r.lon,r.lat])
+      .setPopup(new maplibregl.Popup().setHTML(
+        `<b>${r.id}</b><br>${r.type} · ${r.severity} · ${r.linkage} (sum ${r.sum})<br>${r.lga}, ${r.state}<br><i>${r.note}</i>`))
+      .addTo(map));
+  });
+  // KPIs (live rows only — historical excluded per C-2)
+  const live = rows.filter(r=>!r.hist);
+  const direct = live.filter(r=>r.linkage==="Direct").length;
+  const actorCoded = live.filter(r=>r.actors.length>0).length;
+  const viol = live.filter(r=>["violent","fatal","coercive"].includes(r.severity));
+  const pass = viol.length ? Math.round(100*viol.filter(r=>r.passivity).length/viol.length) : 0;
+  kTotal.textContent = live.length; kDirect.textContent = direct;
+  kActor.textContent = actorCoded; kPass.textContent = pass + "%";
+  // List
+  list.innerHTML = rows.map(r=>`<div class="card ${r.linkage}">
+    <b>${r.id}</b> ${r.hist?'<span class="tag">2023 baseline</span>':""}
+    <span class="tag">${r.type}</span><span class="tag">${r.linkage} ${r.sum}</span>
+    <span class="tag">${r.severity}</span>
+    <div class="meta">${r.lga}, ${r.state} · ${r.phase}</div>
+    <div class="meta">${r.actors.length?r.actors.map(a=>`${a[0]} → <b>${a[1]}</b>`).join(" · "):"<i>no actor link (info)</i>"}</div>
+  </div>`).join("") || "<i>No incidents match filters.</i>";
+  // Actor x conduct matrix (live only)
+  const conducts = ["perpetrator","victim","passive","intervener","detained-arrested"];
+  const acts = [...new Set(live.flatMap(r=>r.actors.map(a=>a[0])))];
+  let html = "<tr><th>actor \\ conduct</th>" + conducts.map(c=>`<th>${c}</th>`).join("") + "</tr>";
+  const pub = a => a.startsWith("party-") ? "Party-linked (alleged)" : a; // FR-20 collapse
+  const shown = [...new Set(acts.map(pub))];
+  shown.forEach(a=>{
+    html += `<tr><th>${a}</th>` + conducts.map(c=>{
+      const n = live.reduce((n,r)=>n+r.actors.filter(x=>pub(x[0])===a&&x[1]===c).length,0);
+      return `<td>${n||""}</td>`;
+    }).join("") + "</tr>";
+  });
+  matrix.innerHTML = html || "<tr><td>No data</td></tr>";
+}
+document.querySelectorAll("#linkageChips .chip").forEach(ch=>ch.onclick=()=>{
+  document.querySelectorAll("#linkageChips .chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+  ch.setAttribute("aria-pressed","true"); state.link = ch.dataset.link; render();
+});
+typeSel.onchange = e=>{ state.type = e.target.value; render(); };
+stateSel.onchange = e=>{ state.st = e.target.value; render(); };
+histToggle.onclick = ()=>{
+  state.hist = !state.hist;
+  histToggle.setAttribute("aria-pressed", String(state.hist)); render();
+};
+function download(name, text, mime){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text],{type:mime})); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+const WM = "Observer Data — not official INEC results";
+csvBtn.onclick = ()=>{
+  const rows = filtered().filter(r=>!r.hist);
+  const csv = ["attribution: "+WM,"id,type,severity,state,lga,phase,linkage,linkage_sum,actors",
+    ...rows.map(r=>[r.id,r.type,r.severity,r.state,r.lga,r.phase,r.linkage,r.sum,
+      `"${r.actors.map(a=>a[0]+":"+a[1]).join(";")}"`].join(","))].join("\n");
+  download("esrom-export.csv", csv, "text/csv");
+};
+geoBtn.onclick = ()=>{
+  const fc = {type:"FeatureCollection", attribution:WM,
+    features:filtered().filter(r=>!r.hist).map(r=>({type:"Feature",
+      geometry:{type:"Point",coordinates:[r.lon,r.lat]},
+      properties:{id:r.id,incident_type:r.type,severity:r.severity,
+        linkage:r.linkage,phase:r.phase,state:r.state,lga:r.lga}}))};
+  download("esrom-export.geojson", JSON.stringify(fc,null,2), "application/geo+json");
+};
+map.on("load", render);
+</script>
+</body>
+</html>
