@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Redirecting…</title>
+    <script>
+      /*
+       * GitHub Pages 404 shim for unregistered QR placements.
+       *
+       * The Danga app deliberately does NOT use `output: "export"` — see
+       * next.config.ts — because FR-4 requires an unknown `/l/<code>` to return
+       * HTTP 200 with `placement: "unknown"` rather than 404, which needs
+       * `dynamicParams: true`. That guarantee only exists when a Node server is
+       * running the app.
+       *
+       * This repo is served by GitHub Pages, which is static files only. So an
+       * unregistered `/l/<code>` is a genuine static 404: the framework never
+       * runs, and a scanned QR dead-ends on a lost lead. Only the placements in
+       * `src/data/placements.json` resolve, because those are the only ones
+       * prerendered to `dist/l/<code>.html`.
+       *
+       * Static hosting cannot change the status code, so this shim cannot make
+       * it a true 200. It does remove the dead end: the placement code is
+       * forwarded to the demo's `/l` route as `?placement=`, which the boot
+       * script and `parseQrContext` both read. The visitor gets the real
+       * landing — banner, hero and a working WhatsApp CTA — and the scan is
+       * still attributed to the printed code instead of being lost.
+       *
+       * Fully satisfying FR-4 (HTTP 200) requires hosting `dist/` with
+       * `next start`, i.e. moving off GitHub Pages.
+       */
+      (function () {
+        var REPO = "agentic-live-demos";
+        var DEMO = "001_danga_lead_gen_qr";
+        var BASE = "/" + REPO + "/" + DEMO + "/dist";
+
+        var segments = window.location.pathname.split("/").filter(Boolean);
+        var at = segments.indexOf(DEMO);
+        if (at === -1 || segments[at + 1] !== "dist") return; // not this demo
+
+        var rest = segments.slice(at + 2); // everything after "<demo>/dist"
+        if (rest[0] !== "l" || !rest[1]) return; // only /l/<code> is ours
+
+        var code = rest[1];
+        try {
+          code = decodeURIComponent(code);
+        } catch (e) {
+          /* keep the raw segment */
+        }
+
+        var target =
+          BASE +
+          "/l?src=qr&placement=" +
+          encodeURIComponent(code) +
+          (rest.length > 2 ? "&path=" + encodeURIComponent(rest.slice(2).join("/")) : "");
+
+        window.location.replace(target);
+      })();
+    </script>
+    <noscript>
+      <p>
+        This QR code points at a placement that is not registered yet.
+        <a href="/agentic-live-demos/001_danga_lead_gen_qr/dist/l?src=qr"
+          >Continue to the Danga landing page</a
+        >.
+      </p>
+    </noscript>
+  </head>
+  <body>
+    <p>Taking you to the Danga landing page…</p>
+  </body>
+</html>
