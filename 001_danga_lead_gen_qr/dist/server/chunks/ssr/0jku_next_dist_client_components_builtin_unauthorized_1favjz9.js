@@ -1,3 +1,0 @@
-module.exports=[24658,(a,b,c)=>{"use strict";Object.defineProperty(c,"__esModule",{value:!0}),Object.defineProperty(c,"default",{enumerable:!0,get:function(){return f}});let d=a.r(12478),e=a.r(61493);function f(){return(0,d.jsx)(e.HTTPAccessErrorFallback,{status:401,message:"You're not authorized to access this page."})}("function"==typeof c.default||"object"==typeof c.default&&null!==c.default)&&void 0===c.default.__esModule&&(Object.defineProperty(c.default,"__esModule",{value:!0}),Object.assign(c.default,c),b.exports=c.default)},672,function(a){a.n(a.i(24658))}];
-
-//# sourceMappingURL=0jku_next_dist_client_components_builtin_unauthorized_1favjz9.js.map
