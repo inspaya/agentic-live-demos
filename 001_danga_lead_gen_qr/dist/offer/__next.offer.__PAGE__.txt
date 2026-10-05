@@ -1,0 +1,50 @@
+1:"$Sreact.fragment"
+2:I[30453,["/_next/static/chunks/2hge6nry4v6i0.js","/_next/static/chunks/35asu1coc3z5w.js"],"BannerInjector"]
+3:I[6635,["/_next/static/chunks/2hge6nry4v6i0.js","/_next/static/chunks/35asu1coc3z5w.js"],""]
+9:X
+e:X
+e:C
+0:{"buildId":"NZRTAZ3IW7J58Vm9m4J-b","data":[{"rsc":["$","$1","c",{"children":[[["$","$L2",null,{}],["$","header",null,{"className":"border-b border-zinc-200 dark:border-zinc-800","children":["$","div",null,{"className":"mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4 sm:px-6","children":[["$","$L3",null,{"href":"/","className":"text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50","children":"Danga"}],["$","nav",null,{"aria-label":"Primary","className":"flex items-center gap-4 text-sm","children":[["$","$L3",null,{"href":"/offer","className":"text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100","children":"QR discount terms"}],["$","$L3",null,{"href":"/privacy","className":"text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100","children":"Privacy"}],["$","$L3",null,{"href":"/tools/qr","className":"text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100","children":"QR generator"}]]}]]}]}],["$","main",null,{"className":"mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-10 sm:px-6","children":[["$","h1",null,{"className":"text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50","children":"5% QR discount — terms"}],["$","p",null,{"className":"mt-4 text-base leading-7 text-zinc-600 dark:text-zinc-400","children":"Scanning a Danga QR code unlocks 5% off your purchase. These are the conditions that apply."}],["$","ul",null,{"className":"mt-6 space-y-3","children":[["$","li","Valid on select properties only.",{"className":"rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300","children":"Valid on select properties only."}],["$","li","Cannot be combined with other offers or promotions.",{"className":"rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300","children":"Cannot be combined with other offers or promotions."}],["$","li","Subject to availability — properties may be withdrawn at any time.",{"className":"rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300","children":"Subject to availability — properties may be withdrawn at any time."}],["$","li","Quote your discount code to your Danga agent when you start the chat.",{"className":"rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300","children":"Quote your discount code to your Danga agent when you start the chat."}],["$","li","One discount per customer.",{"className":"rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300","children":"One discount per customer."}]]}],["$","p",null,{"className":"mt-6 text-sm font-medium text-zinc-900 dark:text-zinc-100","children":"This offer expires on 31 December 2026."}],["$","p",null,{"className":"mt-8 text-sm text-zinc-500 dark:text-zinc-400","children":"Your discount code is shown in the green banner when you arrive via a QR code, and is included automatically in your WhatsApp message."}],["$","p",null,{"className":"mt-8","children":["$","$L3",null,{"href":"/","className":"text-sm font-medium text-emerald-700 underline underline-offset-2 hover:opacity-80 dark:text-emerald-400","children":"Back to chat with an agent"}]}]]}],["$","footer",null,{"className":"mt-auto border-t border-zinc-200 dark:border-zinc-800","children":["$","div",null,{"className":"mx-auto flex w-full max-w-3xl flex-col gap-2 px-4 py-6 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:text-zinc-400","children":["$L4","$L5"]}]}]],["$L6"],"$L7"]}],"isPartial":"$@8","staleTime":"$9","varyParams":null},{"rsc":"$La","isPartial":"$@b","staleTime":"$9","varyParams":null},{"rsc":"$Lc","isPartial":"$@d","staleTime":"$9","varyParams":"$e"},{"rsc":"$Lf","isPartial":"$@10","staleTime":"$9","varyParams":null}],"isUpgradeableISRFallback":false,"a":"$@11","rootVaryParams":null,"needsRuntimeRequest":"$@12"}
+13:I[17968,["/_next/static/chunks/2hge6nry4v6i0.js"],"OutletBoundary"]
+14:"$Sreact.suspense"
+16:I[17968,["/_next/static/chunks/2hge6nry4v6i0.js"],"ViewportBoundary"]
+17:I[17968,["/_next/static/chunks/2hge6nry4v6i0.js"],"MetadataBoundary"]
+18:I[59251,["/_next/static/chunks/2hge6nry4v6i0.js"],"IconMark"]
+19:I[4778,["/_next/static/chunks/2hge6nry4v6i0.js"],"default"]
+1a:I[53967,["/_next/static/chunks/2hge6nry4v6i0.js"],"default"]
+1c:I[52954,["/_next/static/chunks/2hge6nry4v6i0.js"],"ClientBootstrap"]
+:HL["/_next/static/chunks/2kk-y389barf_.css","style"]
+4:["$","p",null,{"children":"© 2026 Danga. All rights reserved."}]
+5:["$","nav",null,{"aria-label":"Footer","className":"flex flex-wrap gap-4","children":[["$","$L3",null,{"href":"/offer","className":"hover:text-zinc-900 dark:hover:text-zinc-100","children":"5% QR discount terms"}],["$","$L3",null,{"href":"/privacy","className":"hover:text-zinc-900 dark:hover:text-zinc-100","children":"Privacy policy"}],["$","$L3",null,{"href":"/tools/qr","className":"hover:text-zinc-900 dark:hover:text-zinc-100","children":"QR generator"}]]}]
+6:["$","script","script-0",{"src":"/_next/static/chunks/35asu1coc3z5w.js","async":true}]
+7:["$","$L13",null,{"children":["$","$14",null,{"name":"Next.MetadataOutlet","children":"$@15"}]}]
+a:["$","$1","h",{"children":[null,["$","$L16",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L17",null,{"children":["$","$14",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"5% QR discount — terms | Danga"}],["$","meta","1",{"name":"description","content":"Scan a Danga QR code, browse the portfolio and talk to a real agent on WhatsApp. QR scans unlock an automatic 5% discount."}],["$","link","2",{"rel":"icon","href":"/favicon.ico?favicon.2vob68tjqpejf.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L18","3",{}]]}]}]}],null]}]
+c:["$","$1","c",{"children":[null,["$","$L19",null,{"parallelRouterKey":"children","template":["$","$L1a",null,{}]}]]}]
+1b:T540,(function(){try{
+var K=["billboard-main-st","brochure-2026q4","site-signage-plot12"],W=30,C="danga_attr",S="danga_attr_session",L=location,D=document;
+function E(s){return btoa(String.fromCharCode.apply(null,new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function N(s){var t=s.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";return new TextDecoder().decode(Uint8Array.from(atob(t),c=>c.charCodeAt(0)))}
+function G(n){var p=n+"=",c=D.cookie.split("; ");for(var s of c)if(s.indexOf(p)===0)return s.slice(p.length);return null}
+var m=/(?:^|\/)l\/([^/?#]+)/.exec(L.pathname),p=null;
+if(m&&m[1])try{p=decodeURIComponent(m[1])}catch(e){p=m[1]}
+var q=p!==null||/(?:^|[?&])src=qr(?:&|$)/.test(L.search);
+var r=null;try{r=sessionStorage.getItem(S)}catch(e){}
+if(!r)try{r=G(C)}catch(e){}
+var a=null;if(r)try{a=JSON.parse(N(r))}catch(e){}
+if((!a||a.v!==1||a.ref!=="qr"||a.offer!=="disc5")&&q){
+var ok=p!==null&&K.indexOf(p)>-1;
+a={v:1,ref:"qr",placement:ok?p:"unknown",placementValid:ok,offer:"disc5",ts:new Date().toISOString(),code:""};
+var x=E(JSON.stringify(a));
+try{D.cookie=C+"="+x+";path=/;max-age="+(W*86400)+";SameSite=Lax"+(L.protocol==="https:"?";Secure":"");sessionStorage.setItem(S,x)}catch(e){}
+}
+D.documentElement.setAttribute("data-route",a&&a.ref==="qr"?"qr":"direct");
+}catch(e){}})();f:["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/2kk-y389barf_.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/2hge6nry4v6i0.js","async":true}]],["$","html",null,{"lang":"en","suppressHydrationWarning":true,"children":[["$","head",null,{"children":["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$1b"}}]}],["$","body",null,{"className":"flex min-h-screen flex-col bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50","children":[["$","$L1c",null,{}],["$","$L19",null,{"parallelRouterKey":"children","template":["$","$L1a",null,{}],"notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]]}]]}]]}]]}]
+15:null
+12:true
+9:300
+9:C
+11:0
+b:"$undefined"
+d:"$undefined"
+10:"$undefined"
+8:"$undefined"
