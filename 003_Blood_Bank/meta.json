@@ -1,0 +1,6 @@
+{
+  "title": "Lifeline Blood Bank",
+  "description": "A blood bank inventory search, SMS order dispatch, and stock-deducting payments.",
+  "thumbnail": "003_Blood_Bank_10_06_2026.png",
+  "entry": "dist/index.html"
+}
