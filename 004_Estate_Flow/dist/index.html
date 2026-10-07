@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EstateFlow - Property Operations for FCT Abuja</title>
+  <link rel="stylesheet" href="assets/tailwind.min.css">
+  <link rel="stylesheet" href="assets/leaflet.css">
+  <script defer src="assets/leaflet.js"></script>
+  <script defer src="assets/alpine.min.js"></script>
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+
+    .leaflet-container {
+      font-family: inherit;
+      background: #f1f5f9;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      padding: 0;
+    }
+
+    .leaflet-popup-content {
+      margin: 12px 14px;
+      line-height: 1.4;
+    }
+
+    .leaflet-popup-tip {
+      box-shadow: none;
+    }
+
+    .ef-marker {
+      background: transparent;
+      border: none;
+    }
+  </style>
+</head>
+
+<body x-data="demoApp()" x-cloak class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased">
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 space-y-3">
+
+      <!-- Brand Row -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-11 h-11 rounded-2xl bg-emerald-600 shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">EstateFlow</h1>
+            <p class="text-xs text-slate-500">Property Operations &middot; FCT Abuja</p>
+          </div>
+          <span
+            class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-medium ml-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            Live System
+          </span>
+          <span
+            class="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-700 text-xs font-medium">
+            Currency: Naira (&#8358;)
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button @click="openModal()"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Property
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Row -->
+      <nav class="flex items-center gap-1 overflow-x-auto pb-0.5">
+        <button @click="activeTab = 'dashboard'"
+          :class="activeTab === 'dashboard' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9"></rect>
+            <rect x="14" y="3" width="7" height="5"></rect>
+            <rect x="14" y="12" width="7" height="9"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Dashboard
+        </button>
+
+        <button @click="activeTab = 'listings'"
+          :class="activeTab === 'listings' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          Listings
+        </button>
+
+        <button @click="activeTab = 'landlords'"
+          :class="activeTab === 'landlords' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Landlords
+        </button>
+
+        <button @click="activeTab = 'tenants'"
+          :class="activeTab === 'tenants' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Tenants
+        </button>
+
+        <button @click="activeTab = 'agreements'"
+          :class="activeTab === 'agreements' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          Agreements
+          <span
+            :class="activeTab === 'agreements' ? 'bg-white/20 text-white' : pendingAgreements > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'"
+            class="px-1.5 py-0.5 rounded-full text-xs font-semibold" x-text="pendingAgreements"></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- App Shell -->
+  <div id="app" class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- ============ DASHBOARD (LANDING) ============ -->
+    <main x-show="activeTab === 'dashboard'" x-transition class="space-y-6">
+
+      <!-- KPI Row -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Properties</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1" x-text="kpi.activeProperties"></p>
+              <p class="text-xs text-emerald-600 mt-2 font-medium">+8% this month</p>
+            </div>
+            <div
+              class="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Available Listings</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1" x-text="kpi.availableListings"></p>
+              <p class="text-xs text-sky-600 mt-2 font-medium">Rent, Buy &amp; Lease</p>
+            </div>
+            <div
+              class="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-50 text-sky-600 border border-sky-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Tenants</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1" x-text="kpi.totalTenants"></p>
+              <p class="text-xs text-violet-600 mt-2 font-medium">Active across FCT</p>
+            </div>
+            <div
+              class="flex items-center justify-center w-12 h-12 rounded-xl bg-violet-50 text-violet-600 border border-violet-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Monthly Rent Roll</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1" x-text="formatNaira(kpi.rentRoll)"></p>
+              <p class="text-xs text-amber-600 mt-2 font-medium">Collected in Naira</p>
+            </div>
+            <div
+              class="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Map + Side Panel -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Interactive FCT Map -->
+        <div class="lg:col-span-2 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-900">Listings Map &middot; FCT Abuja</h2>
+              <p class="text-sm text-slate-500">Live pins across the Federal Capital Territory</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button @click="mapFilter = 'all'"
+                :class="mapFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                class="px-3 py-1 rounded-full text-xs font-semibold transition">All</button>
+              <button @click="mapFilter = 'rent'"
+                :class="mapFilter === 'rent' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+                class="px-3 py-1 rounded-full text-xs font-semibold transition">Rent</button>
+              <button @click="mapFilter = 'buy'"
+                :class="mapFilter === 'buy' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-sky-50 hover:text-sky-700'"
+                class="px-3 py-1 rounded-full text-xs font-semibold transition">Buy</button>
+              <button @click="mapFilter = 'lease'"
+                :class="mapFilter === 'lease' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700'"
+                class="px-3 py-1 rounded-full text-xs font-semibold transition">Lease</button>
+            </div>
+          </div>
+
+          <div class="relative w-full h-96 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+            <div id="fctMap" class="absolute inset-0 z-0"></div>
+
+            <!-- Region chip -->
+            <div
+              class="absolute top-3 right-3 z-10 px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm text-xs font-semibold text-slate-700 pointer-events-none">
+              FCT, Abuja &middot; Nigeria
+            </div>
+
+            <!-- Legend -->
+            <div
+              class="absolute left-3 bottom-3 z-10 flex flex-col gap-1.5 p-3 rounded-xl bg-white border border-slate-200 shadow-sm text-xs pointer-events-none">
+              <span class="flex items-center gap-2 text-slate-600"><span
+                  class="w-3 h-3 rounded-full bg-emerald-600"></span>For Rent</span>
+              <span class="flex items-center gap-2 text-slate-600"><span
+                  class="w-3 h-3 rounded-full bg-sky-600"></span>For Sale</span>
+              <span class="flex items-center gap-2 text-slate-600"><span
+                  class="w-3 h-3 rounded-full bg-amber-500"></span>For Lease</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-slate-900">Listing Mix</h3>
+            <span class="text-xs text-slate-500" x-text="properties.length + ' live'"></span>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="row in listingMix" :key="row.mode">
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="capitalize text-slate-600" x-text="row.mode"></span>
+                  <span class="font-semibold text-slate-900" x-text="row.count + ' (' + row.pct + '%)'"></span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div :class="row.mode === 'rent' ? 'bg-emerald-500' : row.mode === 'buy' ? 'bg-sky-500' : 'bg-amber-400'"
+                    class="h-full rounded-full transition-all" :style="`width: ${row.pct}%`"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-slate-900">Top Districts</h3>
+              <span class="text-xs text-slate-500">by listings</span>
+            </div>
+            <div class="space-y-2">
+              <template x-for="d in districtStats" :key="d.name">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+                  <span class="text-sm text-slate-700" x-text="d.name"></span>
+                  <span class="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-600"
+                    x-text="d.count"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-slate-900">Pending sign-offs</h3>
+              <span class="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-700"
+                x-text="pendingAgreements"></span>
+            </div>
+            <p class="text-xs text-slate-500">Agreements awaiting tenant signature before payment.</p>
+            <button @click="openModal()"
+              class="w-full mt-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md transition">
+              Add New Property
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Connections + Pricing -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Landlords & Tenants Connection -->
+        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-900">Landlords &amp; Tenants</h2>
+              <p class="text-sm text-slate-500">Matched for Rent, Buy &amp; Lease deals</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">Active
+              Network</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Landlords</p>
+              <p class="text-2xl font-bold text-slate-900 mt-1" x-text="landlords.length"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Matched Connections</p>
+              <p class="text-2xl font-bold text-slate-900 mt-1" x-text="connectedPairs"></p>
+            </div>
+          </div>
+
+          <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
+            <template x-for="conn in connections" :key="conn.id">
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-medium text-slate-900 text-sm" x-text="conn.landlordName"></p>
+                    <p class="text-xs text-slate-500">Landlord</p>
+                  </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold capitalize"
+                  :class="modeChip(conn.mode)" x-text="conn.mode"></span>
+                <div class="flex items-center gap-3 text-right">
+                  <div>
+                    <p class="font-medium text-slate-900 text-sm" x-text="conn.tenantName"></p>
+                    <p class="text-xs text-slate-500">Tenant</p>
+                  </div>
+                  <div
+                    class="flex items-center justify-center w-9 h-9 rounded-lg bg-sky-100 text-sky-700 border border-sky-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Realtime Pricing -->
+        <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-semibold text-slate-900">Realtime Pricing</h2>
+              <p class="text-sm text-slate-500">Market rates by property type, in Naira</p>
+            </div>
+            <span
+              class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">Realtime</span>
+          </div>
+
+          <div class="space-y-3">
+            <template x-for="price in pricingOverview" :key="price.type">
+              <div
+                class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-slate-200 text-emerald-600">
+                    <svg x-show="price.icon === 'house'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    <svg x-show="price.icon === 'apartment'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <svg x-show="price.icon === 'building'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <line x1="12" y1="2" x2="12" y2="22"></line>
+                      <path d="M2 9l10-7 10 7"></path>
+                      <path d="M5 22V10h14v12"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="font-medium text-slate-900 capitalize" x-text="price.type"></p>
+                    <p class="text-xs text-slate-500" x-text="price.trend"></p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold text-slate-900" x-text="formatNaira(price.avgPrice)"></p>
+                  <p class="text-xs text-slate-500">Avg. / Year</p>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600 mt-0.5" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <p class="text-xs text-emerald-700">All figures are quoted in Nigerian Naira (&#8358;) and refreshed
+              against live FCT market rates.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ LISTINGS ============ -->
+    <main x-show="activeTab === 'listings'" x-transition class="space-y-6">
+      <section class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Property Listings</h2>
+            <p class="text-sm text-slate-500">Filter by Rent, Buy, Lease, type or district</p>
+          </div>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input x-model="searchQuery" type="text" placeholder="Search district, title or landlord..."
+                class="w-full sm:w-72 pl-9 pr-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
+            <select x-model="filterMode"
+              class="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <option value="all">All Modes</option>
+              <option value="rent">Rent</option>
+              <option value="buy">Buy</option>
+              <option value="lease">Lease</option>
+            </select>
+            <select x-model="filterType"
+              class="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <option value="all">All Types</option>
+              <option value="house">House</option>
+              <option value="apartment">Apartment</option>
+              <option value="building">Building</option>
+            </select>
+          </div>
+        </div>
+
+        <div x-show="filteredProperties.length === 0"
+          class="p-10 rounded-xl border border-dashed border-slate-300 text-center space-y-3">
+          <p class="text-sm text-slate-500">No properties match the current filters.</p>
+          <button @click="searchQuery = ''; filterMode = 'all'; filterType = 'all'"
+            class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition">
+            Reset filters
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="prop in filteredProperties" :key="prop.id">
+            <div
+              class="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-semibold text-slate-900" x-text="prop.title"></h3>
+                  <p class="text-xs text-slate-500 mt-1" x-text="prop.location + ', FCT'"></p>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold border capitalize whitespace-nowrap"
+                  :class="modeChip(prop.mode)" x-text="prop.mode"></span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-slate-200 text-emerald-600">
+                    <svg x-show="prop.type === 'house'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    <svg x-show="prop.type === 'apartment'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <svg x-show="prop.type === 'building'" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <line x1="12" y1="2" x2="12" y2="22"></line>
+                      <path d="M2 9l10-7 10 7"></path>
+                      <path d="M5 22V10h14v12"></path>
+                    </svg>
+                  </div>
+                  <span class="text-sm text-slate-600 capitalize" x-text="prop.type"></span>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-bold text-emerald-600" x-text="formatNaira(prop.price)"></p>
+                  <p class="text-xs text-slate-500" x-text="prop.mode === 'buy' ? 'Sale price' : 'Per year'"></p>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs text-slate-500">Landlord</p>
+                  <p class="text-sm font-medium text-slate-800" x-text="prop.landlord"></p>
+                </div>
+                <button @click="createAgreementFromProperty(prop)"
+                  class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+                  Create Agreement
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ LANDLORDS ============ -->
+    <main x-show="activeTab === 'landlords'" x-transition class="space-y-6">
+      <section class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Landlords</h2>
+            <p class="text-sm text-slate-500">Owners listed across the FCT portfolio</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium"
+            x-text="landlords.length + ' accounts'"></span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="l in landlords" :key="l.id">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-300 hover:shadow-md transition space-y-3">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-slate-900" x-text="l.name"></p>
+                  <p class="text-xs text-slate-500" x-text="l.email"></p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                <span class="text-sm text-slate-500">Properties Owned</span>
+                <span class="text-sm font-bold text-slate-900" x-text="l.propertiesCount"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ TENANTS ============ -->
+    <main x-show="activeTab === 'tenants'" x-transition class="space-y-6">
+      <section class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Tenants</h2>
+            <p class="text-sm text-slate-500">Renters, buyers and lease enquiries</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-medium"
+            x-text="tenants.length + ' active'"></span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="t in tenants" :key="t.id">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-sky-300 hover:shadow-md transition space-y-3">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex items-center justify-center w-10 h-10 rounded-xl bg-sky-100 text-sky-700 border border-sky-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-slate-900" x-text="t.name"></p>
+                  <p class="text-xs text-slate-500" x-text="t.email"></p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-slate-200">
+                <span class="text-sm text-slate-500">Interested In</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold border capitalize"
+                  :class="modeChip(t.interest)" x-text="t.interest"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ AGREEMENTS ============ -->
+    <main x-show="activeTab === 'agreements'" x-transition class="space-y-6">
+      <section class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Tenant Agreements</h2>
+            <p class="text-sm text-slate-500">Drafted before payment &middot; all amounts in Naira (&#8358;)</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">Pre-Payment</span>
+        </div>
+
+        <div class="space-y-4">
+          <template x-for="ag in agreements" :key="ag.id">
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div class="space-y-2">
+                  <h3 class="font-semibold text-slate-900 cursor-pointer hover:text-emerald-700 transition"
+                    @click="openContract(ag)" x-text="ag.propertyTitle"></h3>
+                  <p class="text-xs text-slate-500" x-text="ag.location + ', FCT'"></p>
+                  <div class="flex flex-wrap items-center gap-2 mt-2">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold border capitalize"
+                      :class="statusChip(ag.status)" x-text="ag.status"></span>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold border capitalize"
+                      :class="modeChip(ag.mode)" x-text="ag.mode"></span>
+                    <span
+                      class="px-2 py-0.5 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-700"
+                      x-text="formatNairaFull(ag.amount)"></span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p class="text-xs text-slate-500">Landlord</p>
+                    <p class="font-medium text-slate-800" x-text="ag.landlord"></p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500">Tenant</p>
+                    <p class="font-medium text-slate-800" x-text="ag.tenant"></p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500">Start Date</p>
+                    <p class="font-medium text-slate-800" x-text="ag.startDate"></p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500">Term</p>
+                    <p class="font-medium text-slate-800" x-text="ag.term"></p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500">Deposit (&#8358;)</p>
+                    <p class="font-medium text-slate-800" x-text="formatNairaFull(ag.deposit)"></p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500">Agreement ID</p>
+                    <p class="font-medium text-slate-800" x-text="ag.ref"></p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
+                <p class="text-xs text-slate-500">
+                  <template x-if="ag.status !== 'paid'">
+                    <span>Open the signed contract to settle through the Naira gateway</span>
+                  </template>
+                  <template x-if="ag.status === 'paid'">
+                    <span class="font-medium text-emerald-700">Settled &middot; Payment ref <span x-text="ag.paymentRef"></span></span>
+                  </template>
+                </p>
+                <div class="flex items-center gap-2">
+                  <button @click="openContract(ag)"
+                    class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition inline-flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    View Contract
+                  </button>
+                  <template x-if="ag.status !== 'paid'">
+                    <div class="flex items-center gap-2">
+                      <button @click="updateAgreement(ag.id, 'pending')"
+                        class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition"
+                        :disabled="ag.status === 'pending' || ag.status === 'signed'">Mark Pending</button>
+                      <button @click="updateAgreement(ag.id, 'signed')"
+                        class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition"
+                        :disabled="ag.status === 'signed'">Mark as Signed</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Add Property Modal -->
+  <div x-show="isModalOpen" x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div @click.away="closeModal()"
+      class="w-full max-w-2xl rounded-2xl bg-white border border-slate-200 shadow-xl space-y-6 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900">Add New Property</h3>
+          <p class="text-sm text-slate-500">Publish a Rent, Buy or Lease listing in FCT</p>
+        </div>
+        <button @click="closeModal()" class="p-2 rounded-lg hover:bg-slate-100 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form @submit.prevent="addProperty()" class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700">Property Title</label>
+            <input x-model="newItem.title" type="text" required placeholder="e.g. 3-Bedroom Terrace, Lokogoma"
+              class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700">District (FCT)</label>
+            <input x-model="newItem.location" type="text" required placeholder="e.g. Gwarinpa"
+              class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700">Property Type</label>
+            <select x-model="newItem.type" required
+              class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <option value="house">House</option>
+              <option value="apartment">Apartment</option>
+              <option value="building">Building</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700">Listing Mode</label>
+            <select x-model="newItem.mode" required
+              class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <option value="rent">Rent</option>
+              <option value="buy">Buy</option>
+              <option value="lease">Lease</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700">Price in Naira (&#8358;)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">&#8358;</span>
+              <input x-model.number="newItem.price" type="number" min="0" required placeholder="3500000"
+                class="w-full pl-7 pr-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+            </div>
+            <p class="text-xs text-slate-400">Annual rent or sale price, quoted in Naira</p>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-slate-700">Landlord</label>
+            <select x-model="newItem.landlordId" required
+              class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <template x-for="l in landlords" :key="l.id">
+                <option :value="l.id" x-text="l.name"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" @click="closeModal()"
+            class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition">Cancel</button>
+          <button type="submit"
+            class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md transition">Add
+            Property</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contract Modal -->
+  <div x-show="contractOpen" x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <template x-if="activeAgreement">
+      <div @click.outside="closeContract()"
+        class="w-full max-w-3xl rounded-2xl bg-white border border-slate-200 shadow-xl flex flex-col"
+        style="max-height: 92vh">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </span>
+            <div>
+              <h3 class="text-lg font-semibold text-slate-900" x-text="contractTitle(activeAgreement)"></h3>
+              <p class="text-xs text-slate-500"
+                x-text="activeAgreement.ref + ' · Executed in FCT Abuja'"></p>
+            </div>
+          </div>
+          <button @click="closeContract()" class="p-2 rounded-lg hover:bg-slate-100 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="overflow-y-auto p-6 bg-slate-50" style="max-height: calc(92vh - 140px)">
+          <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-5 shadow-sm">
+            <div class="text-center space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-widest text-slate-500">Federal Capital Territory,
+                Abuja &mdash; Nigeria</p>
+              <h4 class="text-xl font-bold text-slate-900 uppercase tracking-wide"
+                x-text="contractTitle(activeAgreement)"></h4>
+              <p class="text-xs text-slate-500">Generated by EstateFlow &middot; Reference
+                <span class="font-semibold" x-text="activeAgreement.ref"></span></p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Party A &mdash; Landlord</p>
+                <p class="mt-1 font-semibold text-slate-900" x-text="activeAgreement.landlord"></p>
+                <p class="text-xs text-slate-500">Vendor / Lessor of record</p>
+              </div>
+              <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Party B &mdash; Tenant</p>
+                <p class="mt-1 font-semibold text-slate-900" x-text="activeAgreement.tenant"></p>
+                <p class="text-xs text-slate-500">Lessee / Purchaser of record</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p class="text-xs text-slate-500">Property</p>
+                <p class="font-medium text-slate-800" x-text="activeAgreement.propertyTitle"></p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Location</p>
+                <p class="font-medium text-slate-800" x-text="activeAgreement.location + ', FCT'"></p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Consideration</p>
+                <p class="font-medium text-emerald-700" x-text="formatNairaFull(activeAgreement.amount)"></p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Security Deposit</p>
+                <p class="font-medium text-slate-800" x-text="formatNairaFull(activeAgreement.deposit)"></p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Term</p>
+                <p class="font-medium text-slate-800" x-text="activeAgreement.term"></p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Commencement</p>
+                <p class="font-medium text-slate-800" x-text="activeAgreement.startDate"></p>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-sm text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
+              <p class="font-semibold text-slate-800">Terms &amp; Conditions</p>
+              <p>1. The Parties agree a total consideration of
+                <span class="font-semibold text-slate-800"
+                  x-text="formatNairaFull(activeAgreement.amount)"></span>
+                payable through the EstateFlow Naira payment gateway, with a security deposit of
+                <span class="font-semibold text-slate-800" x-text="formatNairaFull(activeAgreement.deposit)"></span>
+                held in escrow until handover.</p>
+              <p>2. The term of this Agreement is
+                <span class="font-semibold text-slate-800" x-text="activeAgreement.term"></span>
+                commencing on <span class="font-semibold text-slate-800" x-text="activeAgreement.startDate"></span>,
+                renewable upon mutual written consent of both Parties.</p>
+              <p>3. The Landlord shall deliver the property in habitable condition and maintain structural elements,
+                plumbing and electrical fittings for the duration of the term.</p>
+              <p>4. This Agreement is governed by the laws of the Federal Republic of Nigeria; disputes shall be
+                referred to the High Court of the Federal Capital Territory, Abuja.</p>
+              <p>5. Both Parties confirm execution by electronic signature below, and settlement of all sums due shall
+                be completed via the EstateFlow payment gateway.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-slate-200 pt-5">
+              <template x-for="role in [
+                  { label: 'Landlord / Party A', name: activeAgreement.landlord },
+                  { label: 'Tenant / Party B', name: activeAgreement.tenant }
+                ]" :key="role.label">
+                <div class="space-y-1">
+                  <p x-text="role.name"
+                    style="font-family: 'Segoe Script', 'Bradley Hand', 'Comic Sans MS', cursive; font-size: 21px; color: #0f172a;">
+                    </p>
+                  <div class="border-t border-slate-300 pt-1 flex items-center justify-between gap-2">
+                    <p class="text-xs text-slate-500" x-text="role.label"></p>
+                    <span
+                      class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      Signed
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-400"
+                    x-text="'Executed on ' + activeAgreement.startDate + ' · EstateFlow eSign'"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-t border-slate-200">
+          <div class="flex items-center gap-2">
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </span>
+            <div>
+              <p class="text-sm font-semibold text-slate-800">Signed by both parties</p>
+              <p class="text-xs text-slate-500" x-text="activeAgreement.status === 'paid'
+                ? 'Settled · Payment ref ' + activeAgreement.paymentRef
+                : 'Ready for settlement in Naira'"></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button @click="closeContract()"
+              class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition">Close</button>
+            <template x-if="activeAgreement.status !== 'paid'">
+              <button @click="openPayment()"
+                class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition inline-flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="1" y="4" width="22" height="16" rx="2"></rect>
+                  <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+                Proceed to Payment
+              </button>
+            </template>
+            <template x-if="activeAgreement.status === 'paid'">
+              <button @click="openPayment()"
+                class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition">View
+                Receipt</button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Payment Gateway Modal -->
+  <div x-show="paymentOpen" x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <template x-if="activeAgreement">
+      <div @click.outside="closePayment()"
+        class="w-full max-w-lg rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden flex flex-col"
+        style="max-height: 92vh">
+        <div class="flex items-center justify-between px-6 py-4 bg-slate-900 text-white">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 text-emerald-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </span>
+            <div>
+              <p class="text-sm font-semibold">EstateFlow Pay &middot; Mock Gateway</p>
+              <p class="text-xs text-slate-400">Naira settlement &middot; demo environment</p>
+            </div>
+          </div>
+          <button @click="closePayment()" class="p-2 rounded-lg hover:bg-slate-800 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="overflow-y-auto p-6" style="max-height: calc(92vh - 72px)">
+          <template x-if="payment.step === 'form'">
+            <div class="space-y-5">
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-sm">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Agreement</span>
+                  <span class="font-medium text-slate-800"
+                    x-text="activeAgreement.ref + ' · ' + activeAgreement.propertyTitle"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Payee</span>
+                  <span class="font-medium text-slate-800" x-text="activeAgreement.landlord"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Amount</span>
+                  <span class="font-medium text-slate-800"
+                    x-text="formatNairaFull(activeAgreement.amount)"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Gateway fee</span>
+                  <span class="font-medium text-slate-800" x-text="formatNairaFull(payment.fee)"></span>
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+                  <span class="font-semibold text-slate-800">Total due</span>
+                  <span class="font-bold text-emerald-700"
+                    x-text="formatNairaFull(activeAgreement.amount + payment.fee)"></span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <template x-for="m in [{ id: 'card', label: 'Card' }, { id: 'transfer', label: 'Transfer' }, { id: 'ussd', label: 'USSD' }]"
+                  :key="m.id">
+                  <button @click="payment.method = m.id" x-text="m.label"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold border transition"
+                    :class="payment.method === m.id
+                      ? 'bg-emerald-600 border-emerald-600 text-white'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'"></button>
+                </template>
+              </div>
+
+              <template x-if="payment.method === 'card'">
+                <div class="space-y-3">
+                  <input type="text" value="4084 0840 8408 4081" inputmode="numeric"
+                    class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                  <div class="grid grid-cols-2 gap-3">
+                    <input type="text" value="09/29" placeholder="MM/YY"
+                      class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                    <input type="password" value="408" placeholder="CVV"
+                      class="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                  </div>
+                  <p class="text-xs text-slate-500">Card details are pre-filled for this demo &mdash; no real funds are
+                    moved.</p>
+                </div>
+              </template>
+
+              <template x-if="payment.method === 'transfer'">
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Bank</span><span class="font-medium text-slate-800">Zenith Bank
+                      (Mock)</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Account</span><span class="font-medium text-slate-800">0123 4567
+                      890</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Beneficiary</span><span class="font-medium text-slate-800"
+                      x-text="activeAgreement.landlord"></span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Reference</span><span class="font-medium text-slate-800"
+                      x-text="activeAgreement.ref"></span>
+                  </div>
+                </div>
+              </template>
+
+              <template x-if="payment.method === 'ussd'">
+                <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
+                  <p class="text-2xl font-bold text-slate-900">
+                    *737*000*<span x-text="activeAgreement.amount"></span>#</p>
+                  <p class="text-xs text-slate-500">Dial from the phone number registered with your bank to approve this
+                    Naira payment.</p>
+                </div>
+              </template>
+
+              <button @click="payNow()"
+                class="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition inline-flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Pay <span x-text="formatNairaFull(activeAgreement.amount + payment.fee)"></span>
+              </button>
+              <p class="text-xs text-center text-slate-400">Demo gateway &middot; no real charge will be made.</p>
+            </div>
+          </template>
+
+          <template x-if="payment.step === 'processing'">
+            <div class="py-10 flex flex-col items-center gap-4 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-emerald-600 animate-spin"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+              </svg>
+              <p class="font-semibold text-slate-800">Processing payment&hellip;</p>
+              <p class="text-sm text-slate-500">Contacting the Naira gateway for
+                <span x-text="activeAgreement.ref"></span></p>
+            </div>
+          </template>
+
+          <template x-if="payment.step === 'done'">
+            <div class="py-6 flex flex-col items-center gap-3 text-center">
+              <span class="flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100 text-emerald-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>
+              <h4 class="text-lg font-semibold text-slate-900">Payment Successful</h4>
+              <p class="text-sm text-slate-500"
+                x-text="formatNairaFull(activeAgreement.amount + payment.fee) + ' settled for ' + activeAgreement.ref"></p>
+              <div class="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-left space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Reference</span>
+                  <span class="font-semibold text-slate-800" x-text="payment.ref"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Method</span>
+                  <span class="font-medium text-slate-800" x-text="methodLabel(payment.method)"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Timestamp</span>
+                  <span class="font-medium text-slate-800" x-text="payment.when"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-500">Status</span>
+                  <span
+                    class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Paid</span>
+                </div>
+              </div>
+              <button @click="finishPayment()"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold transition">Back
+                to Agreements</button>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Toast -->
+  <div x-show="showToast" x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 translate-y-0"
+    x-transition:leave-end="opacity-0 translate-y-4"
+    class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-lg">
+    <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <p class="text-sm text-slate-700" x-text="toastMessage"></p>
+  </div>
+
+  <script>
+    function demoApp() {
+      return {
+        activeTab: 'dashboard',
+        searchQuery: '',
+        filterMode: 'all',
+        filterType: 'all',
+        mapFilter: 'all',
+        isModalOpen: false,
+        showToast: false,
+        toastMessage: '',
+        contractOpen: false,
+        paymentOpen: false,
+        activeAgreement: null,
+        payment: { method: 'card', step: 'form', ref: '', when: '', fee: 0 },
+
+        // FCT Abuja reference point
+        fctCenter: [9.0765, 7.3986],
+        _map: null,
+        _markerLayer: null,
+        _tileLayer: null,
+        _tileIndex: 0,
+        _tileSwitches: 0,
+        _tileErrors: 0,
+        _blankTiles: 0,
+        _tileSources: [
+          {
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+            attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors'
+          },
+          {
+            url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attribution: '&copy; OpenStreetMap contributors'
+          },
+          {
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+            attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors'
+          }
+        ],
+
+        kpi: {
+          activeProperties: 0,
+          availableListings: 0,
+          totalTenants: 0,
+          rentRoll: 0
+        },
+
+        landlords: [
+          { id: 1, name: 'Chinedu Okafor', email: 'chinedu@estateflow.ng', propertiesCount: 3 },
+          { id: 2, name: 'Amina Bello', email: 'amina@estateflow.ng', propertiesCount: 3 },
+          { id: 3, name: 'Emeka Nwosu', email: 'emeka@estateflow.ng', propertiesCount: 2 }
+        ],
+
+        tenants: [
+          { id: 1, name: 'Folake Adeyemi', email: 'folake@example.ng', interest: 'rent' },
+          { id: 2, name: 'Tunde Bakare', email: 'tunde@example.ng', interest: 'buy' },
+          { id: 3, name: 'Ngozi Eze', email: 'ngozi@example.ng', interest: 'lease' },
+          { id: 4, name: 'Yusuf Abubakar', email: 'yusuf@example.ng', interest: 'rent' }
+        ],
+
+        properties: [
+          {
+            id: 101,
+            title: '2-Bedroom Apartment, Wuse',
+            location: 'Wuse District',
+            type: 'apartment',
+            mode: 'rent',
+            price: 3500000,
+            landlordId: 1,
+            landlord: 'Chinedu Okafor',
+            lat: 9.0626,
+            lng: 7.4951
+          },
+          {
+            id: 102,
+            title: '4-Bedroom Detached House, Gwarinpa',
+            location: 'Gwarinpa',
+            type: 'house',
+            mode: 'buy',
+            price: 95000000,
+            landlordId: 2,
+            landlord: 'Amina Bello',
+            lat: 9.1118,
+            lng: 7.4147
+          },
+          {
+            id: 103,
+            title: 'Commercial Office Block, Maitama',
+            location: 'Maitama',
+            type: 'building',
+            mode: 'lease',
+            price: 18000000,
+            landlordId: 3,
+            landlord: 'Emeka Nwosu',
+            lat: 9.0860,
+            lng: 7.4840
+          },
+          {
+            id: 104,
+            title: 'Studio Flat, Asokoro',
+            location: 'Asokoro',
+            type: 'apartment',
+            mode: 'rent',
+            price: 2400000,
+            landlordId: 1,
+            landlord: 'Chinedu Okafor',
+            lat: 9.0560,
+            lng: 7.5180
+          },
+          {
+            id: 105,
+            title: 'Waterfront House, Jabi',
+            location: 'Jabi',
+            type: 'house',
+            mode: 'buy',
+            price: 150000000,
+            landlordId: 3,
+            landlord: 'Emeka Nwosu',
+            lat: 9.0690,
+            lng: 7.3760
+          },
+          {
+            id: 106,
+            title: 'Executive Townhouse, Life Camp',
+            location: 'Life Camp',
+            type: 'house',
+            mode: 'lease',
+            price: 7500000,
+            landlordId: 2,
+            landlord: 'Amina Bello',
+            lat: 9.1180,
+            lng: 7.4320
+          },
+          {
+            id: 107,
+            title: '3-Bedroom Terrace, Lokogoma',
+            location: 'Lokogoma',
+            type: 'house',
+            mode: 'rent',
+            price: 4200000,
+            landlordId: 1,
+            landlord: 'Chinedu Okafor',
+            lat: 9.0480,
+            lng: 7.3920
+          },
+          {
+            id: 108,
+            title: 'Serviced Mini Flat, Wuse II',
+            location: 'Wuse II',
+            type: 'apartment',
+            mode: 'rent',
+            price: 5000000,
+            landlordId: 2,
+            landlord: 'Amina Bello',
+            lat: 9.0780,
+            lng: 7.4700
+          }
+        ],
+
+        connections: [
+          { id: 1, landlordName: 'Chinedu Okafor', tenantName: 'Folake Adeyemi', mode: 'rent' },
+          { id: 2, landlordName: 'Amina Bello', tenantName: 'Tunde Bakare', mode: 'buy' },
+          { id: 3, landlordName: 'Emeka Nwosu', tenantName: 'Ngozi Eze', mode: 'lease' },
+          { id: 4, landlordName: 'Chinedu Okafor', tenantName: 'Yusuf Abubakar', mode: 'rent' }
+        ],
+
+        agreements: [
+          {
+            id: 201,
+            propertyTitle: '2-Bedroom Apartment, Wuse',
+            location: 'Wuse District',
+            landlord: 'Chinedu Okafor',
+            tenant: 'Folake Adeyemi',
+            mode: 'rent',
+            amount: 3500000,
+            deposit: 3500000,
+            term: '12 Months',
+            startDate: '2026-11-01',
+            status: 'pending',
+            ref: 'AGR-001',
+            paymentRef: ''
+          },
+          {
+            id: 202,
+            propertyTitle: '4-Bedroom Detached House, Gwarinpa',
+            location: 'Gwarinpa',
+            landlord: 'Amina Bello',
+            tenant: 'Tunde Bakare',
+            mode: 'buy',
+            amount: 95000000,
+            deposit: 9500000,
+            term: 'Sale Agreement',
+            startDate: '2026-12-01',
+            status: 'draft',
+            ref: 'AGR-002',
+            paymentRef: ''
+          },
+          {
+            id: 203,
+            propertyTitle: 'Commercial Office Block, Maitama',
+            location: 'Maitama',
+            landlord: 'Emeka Nwosu',
+            tenant: 'Ngozi Eze',
+            mode: 'lease',
+            amount: 18000000,
+            deposit: 18000000,
+            term: '36 Months',
+            startDate: '2027-01-01',
+            status: 'pending',
+            ref: 'AGR-003',
+            paymentRef: ''
+          }
+        ],
+
+        pricingOverview: [
+          { type: 'apartment', icon: 'apartment', avgPrice: 4800000, trend: 'Up 6%' },
+          { type: 'house', icon: 'house', avgPrice: 96000000, trend: 'Up 4%' },
+          { type: 'building', icon: 'building', avgPrice: 18500000, trend: 'Stable' }
+        ],
+
+        newItem: {
+          title: '',
+          location: '',
+          type: 'apartment',
+          mode: 'rent',
+          price: 0,
+          landlordId: 1
+        },
+
+        // ---------- Computed ----------
+        get connectedPairs() {
+          return this.connections.length;
+        },
+
+        get pendingAgreements() {
+          return this.agreements.filter(a => a.status === 'pending').length;
+        },
+
+        get filteredProperties() {
+          let items = this.properties;
+
+          if (this.filterMode !== 'all') {
+            items = items.filter(p => p.mode === this.filterMode);
+          }
+          if (this.filterType !== 'all') {
+            items = items.filter(p => p.type === this.filterType);
+          }
+          if (this.searchQuery) {
+            const q = this.searchQuery.toLowerCase();
+            items = items.filter(p =>
+              p.title.toLowerCase().includes(q) ||
+              p.location.toLowerCase().includes(q) ||
+              p.landlord.toLowerCase().includes(q)
+            );
+          }
+          return items;
+        },
+
+        get filteredMapProperties() {
+          if (this.mapFilter === 'all') return this.properties;
+          return this.properties.filter(p => p.mode === this.mapFilter);
+        },
+
+        get listingMix() {
+          const total = this.properties.length || 1;
+          return ['rent', 'buy', 'lease'].map(m => {
+            const count = this.properties.filter(p => p.mode === m).length;
+            return { mode: m, count: count, pct: Math.round((count / total) * 100) };
+          });
+        },
+
+        get districtStats() {
+          const buckets = {};
+          this.properties.forEach(p => {
+            if (!buckets[p.location]) buckets[p.location] = { name: p.location, count: 0 };
+            buckets[p.location].count += 1;
+          });
+          return Object.values(buckets).sort((a, b) => b.count - a.count).slice(0, 5);
+        },
+
+        // ---------- Lifecycle ----------
+        init() {
+          this.updateKPIs();
+          this.$nextTick(() => this.initMap());
+
+          this.$watch('activeTab', (val) => {
+            if (val === 'dashboard') {
+              setTimeout(() => {
+                if (this._map) this._map.invalidateSize();
+                this.renderMarkers();
+              }, 160);
+            }
+          });
+
+          this.$watch('mapFilter', () => this.renderMarkers());
+        },
+
+        // ---------- Map ----------
+        initMap() {
+          if (this._map || typeof L === 'undefined') return;
+          const el = document.getElementById('fctMap');
+          if (!el) return;
+
+          this._map = L.map('fctMap', {
+            scrollWheelZoom: false,
+            zoomControl: true
+          }).setView(this.fctCenter, 12);
+
+          this.loadTileSource();
+
+          L.circle(this.fctCenter, {
+            radius: 12000,
+            color: '#059669',
+            weight: 1,
+            opacity: 0.4,
+            dashArray: '6 8',
+            fillColor: '#059669',
+            fillOpacity: 0.04,
+            interactive: false
+          }).addTo(this._map);
+
+          this._markerLayer = L.layerGroup().addTo(this._map);
+          this.renderMarkers();
+        },
+
+        loadTileSource() {
+          if (!this._map) return;
+          const src = this._tileSources[this._tileIndex];
+          this._tileErrors = 0;
+          this._blankTiles = 0;
+
+          const layer = L.tileLayer(src.url, {
+            maxZoom: 19,
+            crossOrigin: true,
+            attribution: src.attribution
+          });
+
+          layer.on('tileerror', () => {
+            this._tileErrors += 1;
+            if (this._tileErrors >= 2) this.switchTileSource();
+          });
+
+          layer.on('tileload', (e) => {
+            if (this.isBlankTile(e.tile)) {
+              this._blankTiles += 1;
+              if (this._blankTiles >= 3) this.switchTileSource();
+            }
+          });
+
+          layer.addTo(this._map);
+          this._tileLayer = layer;
+        },
+
+        switchTileSource() {
+          if (this._tileSwitches >= this._tileSources.length - 1) return;
+          this._tileSwitches += 1;
+          if (this._tileLayer && this._map && this._map.hasLayer(this._tileLayer)) {
+            this._map.removeLayer(this._tileLayer);
+          }
+          this._tileIndex = (this._tileIndex + 1) % this._tileSources.length;
+          this.loadTileSource();
+        },
+
+        isBlankTile(img) {
+          try {
+            const w = img.naturalWidth;
+            const h = img.naturalHeight;
+            if (!w || !h) return false;
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const data = ctx.getImageData(0, 0, w, h).data;
+            const seen = {};
+            let unique = 0;
+            for (let i = 0; i < data.length; i += 548) {
+              const key = data[i] + ',' + data[i + 1] + ',' + data[i + 2];
+              if (!seen[key]) {
+                seen[key] = 1;
+                unique += 1;
+                if (unique > 20) return false;
+              }
+            }
+            return unique <= 20;
+          } catch (err) {
+            return false;
+          }
+        },
+
+        renderMarkers() {
+          if (!this._map || !this._markerLayer) return;
+          this._markerLayer.clearLayers();
+
+          this.filteredMapProperties.forEach(p => {
+            const bg = p.mode === 'rent' ? 'bg-emerald-600'
+              : p.mode === 'buy' ? 'bg-sky-600'
+                : 'bg-amber-500';
+
+            const html = `
+              <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full ${bg} border-2 border-white shadow-md flex items-center justify-center text-white">
+                  ${this.markerIcon(p.type)}
+                </div>
+                <div class="w-2 h-2 -mt-1 rotate-45 ${bg} border-b-2 border-r-2 border-white"></div>
+                <span class="mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold text-white ${bg} shadow whitespace-nowrap">
+                  ${this.formatNaira(p.price)}
+                </span>
+              </div>`;
+
+            const icon = L.divIcon({
+              className: 'ef-marker',
+              html: html,
+              iconSize: [72, 76],
+              iconAnchor: [36, 42],
+              popupAnchor: [0, -40]
+            });
+
+            L.marker([p.lat, p.lng], { icon: icon })
+              .bindPopup(this.popupHtml(p), { closeButton: true })
+              .addTo(this._markerLayer);
+          });
+        },
+
+        markerIcon(type) {
+          if (type === 'house') {
+            return '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>';
+          }
+          if (type === 'apartment') {
+            return '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M9 9h.01M15 9h.01M9 14h.01M15 14h.01"></path></svg>';
+          }
+          return '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"></rect><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01"></path></svg>';
+        },
+
+        popupHtml(p) {
+          const label = p.mode === 'buy' ? 'Sale price' : 'Per year';
+          return `
+            <div style="min-width:190px">
+              <p style="font-size:14px;font-weight:600;color:#0f172a;margin:0">${p.title}</p>
+              <p style="font-size:12px;color:#64748b;margin:2px 0 0">${p.location}, FCT Abuja</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+                <span style="font-size:15px;font-weight:700;color:#059669">${this.formatNaira(p.price)}</span>
+                <span style="font-size:11px;font-weight:600;text-transform:capitalize;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:2px 8px">${p.mode}</span>
+              </div>
+              <p style="font-size:11px;color:#64748b;margin:6px 0 0">${label} &middot; Listed by ${p.landlord}</p>
+            </div>`;
+        },
+
+        // ---------- Formatting ----------
+        formatNaira(value) {
+          const n = Number(value);
+          if (!isFinite(n)) return '\u20A60';
+          if (n >= 1000000) {
+            const m = n / 1000000;
+            return '\u20A6' + (Number.isInteger(m) ? m.toFixed(0) : m.toFixed(1)) + 'm';
+          }
+          return '\u20A6' + n.toLocaleString('en-NG');
+        },
+
+        formatNairaFull(value) {
+          const n = Number(value);
+          if (!isFinite(n)) return '\u20A60';
+          return '\u20A6' + n.toLocaleString('en-NG');
+        },
+
+        modeChip(mode) {
+          if (mode === 'rent') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          if (mode === 'buy') return 'bg-sky-50 text-sky-700 border-sky-200';
+          return 'bg-amber-50 text-amber-700 border-amber-200';
+        },
+
+        statusChip(status) {
+          if (status === 'paid') return 'bg-emerald-600 text-emerald-50 border-emerald-600';
+          if (status === 'pending') return 'bg-amber-50 text-amber-700 border-amber-200';
+          if (status === 'signed') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          return 'bg-slate-100 text-slate-600 border-slate-200';
+        },
+
+        capitalize(str) {
+          if (!str) return '';
+          return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+
+        // ---------- KPI ----------
+        updateKPIs() {
+          this.kpi.activeProperties = this.properties.length;
+          this.kpi.availableListings = this.properties.length;
+          this.kpi.totalTenants = this.tenants.length;
+          const yearlyRent = this.properties
+            .filter(p => p.mode === 'rent')
+            .reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+          this.kpi.rentRoll = Math.round(yearlyRent / 12);
+        },
+
+        // ---------- Modal ----------
+        openModal() {
+          this.resetForm();
+          this.isModalOpen = true;
+        },
+
+        closeModal() {
+          this.isModalOpen = false;
+          this.resetForm();
+        },
+
+        resetForm() {
+          this.newItem = {
+            title: '',
+            location: '',
+            type: 'apartment',
+            mode: 'rent',
+            price: 0,
+            landlordId: this.landlords.length ? this.landlords[0].id : 1
+          };
+        },
+
+        addProperty() {
+          const landlord = this.landlords.find(l => l.id === Number(this.newItem.landlordId)) ||
+            this.landlords.find(l => l.id === this.newItem.landlordId);
+
+          const newProp = {
+            id: Date.now(),
+            title: this.newItem.title,
+            location: this.newItem.location,
+            type: this.newItem.type,
+            mode: this.newItem.mode,
+            price: Number(this.newItem.price) || 0,
+            landlordId: landlord ? landlord.id : null,
+            landlord: landlord ? landlord.name : 'Unknown',
+            lat: 9.03 + Math.random() * 0.13,
+            lng: 7.35 + Math.random() * 0.22
+          };
+
+          this.properties.unshift(newProp);
+          if (landlord) landlord.propertiesCount += 1;
+          this.updateKPIs();
+          this.closeModal();
+          this.renderMarkers();
+          this.triggerToast(`${newProp.title} added to the FCT map!`);
+        },
+
+        createAgreementFromProperty(prop) {
+          const tenant = this.tenants[0];
+          const newAg = {
+            id: Date.now(),
+            propertyTitle: prop.title,
+            location: prop.location,
+            landlord: prop.landlord,
+            tenant: tenant ? tenant.name : 'Unassigned',
+            mode: prop.mode,
+            amount: prop.price,
+            deposit: prop.mode === 'buy' ? Math.floor(prop.price * 0.1) : prop.price,
+            term: prop.mode === 'rent' ? '12 Months' : prop.mode === 'lease' ? '36 Months' : 'Sale Agreement',
+            startDate: new Date().toISOString().split('T')[0],
+            status: 'draft',
+            paymentRef: '',
+            ref: `AGR-${String(this.agreements.length + 1).padStart(3, '0')}`
+          };
+          this.agreements.unshift(newAg);
+          this.updateKPIs();
+          this.activeTab = 'agreements';
+          this.triggerToast(`Agreement ${newAg.ref} created before payment!`);
+        },
+
+        updateAgreement(id, status) {
+          const ag = this.agreements.find(a => a.id === id);
+          if (ag && ag.status !== 'paid') {
+            ag.status = status;
+            this.updateKPIs();
+            this.triggerToast(`Agreement ${ag.ref} marked as ${status}!`);
+          }
+        },
+
+        // ---------- Contract & Payment ----------
+        contractTitle(ag) {
+          if (!ag) return 'Contract';
+          if (ag.mode === 'buy') return 'Deed of Sale';
+          if (ag.mode === 'lease') return 'Commercial Lease Agreement';
+          return 'Residential Tenancy Agreement';
+        },
+
+        openContract(ag) {
+          this.activeAgreement = ag;
+          this.contractOpen = true;
+        },
+
+        closeContract() {
+          this.contractOpen = false;
+        },
+
+        paymentFee(amount) {
+          const n = Number(amount) || 0;
+          return Math.min(10000, 1000 + Math.round(n * 0.01));
+        },
+
+        openPayment() {
+          if (!this.activeAgreement) return;
+          this.payment = {
+            method: 'card',
+            step: 'form',
+            ref: '',
+            when: '',
+            fee: this.paymentFee(this.activeAgreement.amount)
+          };
+          this.contractOpen = false;
+          this.paymentOpen = true;
+        },
+
+        closePayment() {
+          this.paymentOpen = false;
+        },
+
+        methodLabel(m) {
+          if (m === 'transfer') return 'Bank Transfer';
+          if (m === 'ussd') return 'USSD';
+          return 'Card';
+        },
+
+        payNow() {
+          const ag = this.activeAgreement;
+          if (!ag) return;
+          this.payment.step = 'processing';
+          setTimeout(() => {
+            this.payment.step = 'done';
+            this.payment.ref = 'EF' + Date.now().toString().slice(-8);
+            this.payment.when = new Date().toLocaleString('en-NG', {
+              dateStyle: 'medium',
+              timeStyle: 'short'
+            });
+          }, 1600);
+        },
+
+        finishPayment() {
+          const ag = this.activeAgreement;
+          if (!ag) return;
+          ag.status = 'paid';
+          ag.paymentRef = this.payment.ref;
+          this.paymentOpen = false;
+          this.updateKPIs();
+          this.triggerToast(`Payment of ${this.formatNairaFull(ag.amount)} received for ${ag.ref}!`);
+        },
+
+        triggerToast(msg) {
+          this.toastMessage = msg;
+          this.showToast = true;
+          setTimeout(() => {
+            this.showToast = false;
+          }, 3000);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
