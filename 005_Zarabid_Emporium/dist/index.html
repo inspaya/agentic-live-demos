@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zarabid Emporium — Natural Skincare, Supplements &amp; Food Exports</title>
+  <meta name="description" content="Zarabid Emporium — order natural skincare, organic supplements and premium Nigerian food exports (rice, palm oil, groundnut oil, curry, kuli kuli). Prices in Naira.">
+  <link rel="stylesheet" href="assets/tailwind.min.css">
+  <script defer src="assets/alpine.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    .font-display { font-family: ui-serif, Georgia, "Times New Roman", serif; }
+    ::selection { background: #fed7aa; color: #7c2d12; }
+    .grain {
+      background-image: radial-gradient(#fcd34d 0.5px, transparent 0.5px);
+      background-size: 14px 14px;
+    }
+  </style>
+</head>
+
+<body x-data="demoApp()" class="bg-amber-50 text-stone-800 min-h-screen font-sans antialiased">
+
+  <!-- ══════════ ANNOUNCEMENT BAR ══════════ -->
+  <div class="bg-stone-800 text-amber-100 text-xs sm:text-sm">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+      <p class="flex items-center gap-2 truncate">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+        <span class="truncate">All prices in <strong class="text-amber-300">Naira (&#8358;)</strong> &middot; Free nationwide delivery over &#8358;150,000</span>
+      </p>
+      <p class="hidden sm:block text-amber-200/80">Export shipping: UK &middot; USA &middot; Canada &middot; Ghana</p>
+    </div>
+  </div>
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-amber-200">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
+
+        <!-- Brand -->
+        <a href="#" @click.prevent="activeTab = 'home'" class="flex items-center gap-3 shrink-0">
+          <span class="w-10 h-10 sm:w-11 h-11 rounded-xl overflow-hidden ring-2 ring-orange-300 bg-amber-100 flex items-center justify-center">
+            <img src="assets/client-logo.png" alt="Zarabid Emporium logo" class="w-full h-full object-cover">
+          </span>
+          <span class="leading-tight hidden sm:block">
+            <span class="block font-display text-lg sm:text-xl font-bold text-stone-900 tracking-tight">Zarabid Emporium</span>
+            <span class="block text-xs uppercase tracking-widest text-orange-700 font-semibold">Nature&rsquo;s finest, exported</span>
+          </span>
+        </a>
+
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-1 bg-amber-100/70 p-1 rounded-full border border-amber-200">
+          <template x-for="tab in tabs" :key="tab.id">
+            <button @click="activeTab = tab.id"
+              :class="activeTab === tab.id ? 'bg-orange-600 text-white shadow' : 'text-stone-600 hover:text-orange-700 hover:bg-white'"
+              class="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-2">
+              <span x-text="tab.label"></span>
+              <span x-show="tab.id === 'orders' && pendingCount > 0"
+                class="text-xs px-1.5 py-0.5 rounded-full bg-amber-300 text-stone-900 font-bold" x-text="pendingCount"></span>
+            </button>
+          </template>
+        </nav>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2">
+          <span class="hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            Export certified
+          </span>
+
+          <button @click="activeTab = 'shop'" class="relative p-2.5 rounded-full bg-amber-100 hover:bg-amber-200 border border-amber-300 transition" aria-label="Basket">
+            <svg class="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+            <span x-show="basketCount > 0" x-transition.opacity
+              class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center justify-center"
+              x-text="basketCount"></span>
+          </button>
+
+          <button @click="openOrderModal()"
+            class="hidden sm:inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-sm font-bold px-4 py-2.5 rounded-full transition shadow-sm">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+            Place Order
+          </button>
+
+          <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2.5 rounded-full bg-white border border-amber-200" aria-label="Menu">
+            <svg class="w-5 h-5 text-stone-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile nav -->
+    <div x-show="mobileMenuOpen" x-transition.opacity x-cloak class="md:hidden border-t border-amber-200 bg-white px-4 py-3 space-y-1">
+      <template x-for="tab in tabs" :key="'m-' + tab.id">
+        <button @click="activeTab = tab.id; mobileMenuOpen = false"
+          :class="activeTab === tab.id ? 'bg-orange-600 text-white' : 'text-stone-600 bg-amber-50'"
+          class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition" x-text="tab.label"></button>
+      </template>
+      <button @click="openOrderModal(); mobileMenuOpen = false" class="w-full mt-1 bg-stone-800 text-amber-100 px-4 py-2.5 rounded-xl text-sm font-bold">Place an Order</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 pb-20">
+
+    <!-- ══════════════════ HOME ══════════════════ -->
+    <section x-show="activeTab === 'home'" x-transition.opacity>
+
+      <!-- HERO -->
+      <div class="relative overflow-hidden rounded-3xl mt-6 sm:mt-8 bg-gradient-to-br from-orange-400 via-orange-300 to-amber-400 text-stone-900 shadow-xl grain">
+        <div class="relative grid lg:grid-cols-2 gap-8 p-6 sm:p-10 lg:p-14 items-center">
+          <div>
+            <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest bg-white/50 border border-stone-900/20 text-stone-900 px-3 py-1.5 rounded-full">
+              Farm &middot; Formulate &middot; Export
+            </span>
+            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mt-5 tracking-tight text-stone-950">
+              Pure Nigerian goodness, delivered in&nbsp;Naira.
+            </h1>
+            <p class="mt-4 text-stone-800 text-base sm:text-lg max-w-xl leading-relaxed">
+              Natural skincare, organic supplements and premium food exports &mdash; <strong class="text-orange-950">rice, palm oil, groundnut oil, curry and kuli kuli</strong> &mdash; sourced from local cooperatives and shipped worldwide.
+            </p>
+
+            <div class="mt-7 flex flex-wrap gap-3">
+              <button @click="activeTab = 'shop'"
+                class="bg-white text-orange-700 hover:bg-amber-100 active:scale-95 font-bold px-6 py-3.5 rounded-full shadow-lg transition text-sm sm:text-base">
+                Shop products &rarr;
+              </button>
+              <button @click="openOrderModal()"
+                class="bg-stone-900/80 hover:bg-stone-900 text-white font-bold px-6 py-3.5 rounded-full border border-white/20 transition text-sm sm:text-base">
+                Place an order
+              </button>
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs sm:text-sm text-stone-700 font-medium">
+              <span class="flex items-center gap-2"><svg class="w-4 h-4 text-orange-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> 100% natural ingredients</span>
+              <span class="flex items-center gap-2"><svg class="w-4 h-4 text-orange-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Naira pricing, no FX surprises</span>
+              <span class="flex items-center gap-2"><svg class="w-4 h-4 text-orange-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Dispatch in 48 hours</span>
+            </div>
+          </div>
+
+          <!-- Hero visual -->
+          <div class="relative">
+            <div class="rounded-3xl overflow-hidden ring-4 ring-white/30 shadow-2xl bg-amber-100 aspect-video">
+              <img src="assets/multiple-foods.png" alt="Assorted Zarabid Emporium food exports" class="w-full h-full object-cover">
+            </div>
+            <div class="absolute -bottom-4 -left-2 bg-white text-stone-800 rounded-2xl shadow-xl px-4 py-3 border border-amber-200">
+              <p class="text-xs uppercase tracking-widest text-orange-700 font-bold">Signature</p>
+              <p class="font-display font-bold text-lg leading-tight">Curry &amp; Kuli Kuli</p>
+              <p class="text-xs text-stone-500">From &#8358;3,900 per pack</p>
+            </div>
+            <div class="absolute -top-3 right-2 bg-stone-900 text-amber-200 rounded-full shadow-lg px-4 py-2 text-xs font-bold uppercase tracking-widest">
+              Ships worldwide
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+        <div class="bg-white rounded-2xl border border-amber-200 p-4 sm:p-5 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center">
+              <svg class="w-5 h-5 text-orange-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+            </span>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">+12%</span>
+          </div>
+          <p class="mt-3 text-2xl sm:text-3xl font-bold text-stone-900" x-text="orders.length"></p>
+          <p class="text-xs sm:text-sm text-stone-500 font-medium">Orders today</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-amber-200 p-4 sm:p-5 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center">
+              <svg class="w-5 h-5 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+            </span>
+            <span class="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full" x-text="basketCount + ' items'"></span>
+          </div>
+          <p class="mt-3 text-2xl sm:text-3xl font-bold text-stone-900 truncate" x-text="naira(basketTotal)"></p>
+          <p class="text-xs sm:text-sm text-stone-500 font-medium">Basket value</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-amber-200 p-4 sm:p-5 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center">
+              <svg class="w-5 h-5 text-sky-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>
+            </span>
+            <span class="text-xs font-bold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full">Live</span>
+          </div>
+          <p class="mt-3 text-2xl sm:text-3xl font-bold text-stone-900">14</p>
+          <p class="text-xs sm:text-sm text-stone-500 font-medium">Export markets</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-amber-200 p-4 sm:p-5 hover:shadow-lg transition">
+          <div class="flex items-center justify-between">
+            <span class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+              <svg class="w-5 h-5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v6c0 4.5-3.4 7.4-8 8-4.6-.6-8-3.5-8-8V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            </span>
+            <span class="text-xs font-bold text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">In stock</span>
+          </div>
+          <p class="mt-3 text-2xl sm:text-3xl font-bold text-stone-900" x-text="products.length"></p>
+          <p class="text-xs sm:text-sm text-stone-500 font-medium">Product lines</p>
+        </div>
+      </div>
+
+      <!-- CATEGORY CARDS -->
+      <div class="mt-12">
+        <div class="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-orange-700">Shop by department</p>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-1">Three ranges, one emporium</h2>
+          </div>
+          <button @click="activeTab = 'shop'" class="text-sm font-bold text-orange-700 hover:text-orange-800 underline underline-offset-4">Browse everything &rarr;</button>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-5 mt-6">
+          <button @click="activeCategory = 'skincare'; activeTab = 'shop'" class="text-left bg-white rounded-2xl border border-amber-200 p-6 hover:-translate-y-1 hover:shadow-xl transition group">
+            <span class="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center group-hover:bg-orange-100 transition">
+              <svg class="w-6 h-6 text-orange-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M10 3h4v3l3 5v8a2 2 0 01-2 2H9a2 2 0 01-2-2v-8l3-5V3z"/><path d="M7 14h10"/></svg>
+            </span>
+            <h3 class="font-display text-xl font-bold text-stone-900 mt-4">Natural Skincare</h3>
+            <p class="text-sm text-stone-500 mt-1 leading-relaxed">Shea butter, African black soap and cold-pressed body oils.</p>
+            <p class="text-xs font-bold text-orange-700 mt-3 uppercase tracking-widest">3 products &rarr;</p>
+          </button>
+
+          <button @click="activeCategory = 'supplements'; activeTab = 'shop'" class="text-left bg-white rounded-2xl border border-amber-200 p-6 hover:-translate-y-1 hover:shadow-xl transition group">
+            <span class="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center group-hover:bg-orange-100 transition">
+              <svg class="w-6 h-6 text-orange-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="7" y="3" width="10" height="18" rx="5"/><path d="M7 12h10"/></svg>
+            </span>
+            <h3 class="font-display text-xl font-bold text-stone-900 mt-4">Organic Supplements</h3>
+            <p class="text-sm text-stone-500 mt-1 leading-relaxed">Moringa, herbal teas and daily wellness blends, lab tested.</p>
+            <p class="text-xs font-bold text-orange-700 mt-3 uppercase tracking-widest">2 products &rarr;</p>
+          </button>
+
+          <button @click="activeCategory = 'exports'; activeTab = 'shop'" class="text-left bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl border-2 border-orange-300 p-6 hover:-translate-y-1 hover:shadow-xl transition group">
+            <span class="w-12 h-12 rounded-2xl bg-orange-600 flex items-center justify-center group-hover:bg-orange-700 transition">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+            </span>
+            <h3 class="font-display text-xl font-bold text-stone-900 mt-4">Food Exports</h3>
+            <p class="text-sm text-stone-600 mt-1 leading-relaxed">Rice, palm oil, groundnut oil, <strong class="text-orange-800">curry</strong> &amp; <strong class="text-orange-800">kuli kuli</strong> in export grade packaging.</p>
+            <p class="text-xs font-bold text-orange-700 mt-3 uppercase tracking-widest">6 products &rarr;</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- SIGNATURE EXPORTS HIGHLIGHT -->
+      <div class="mt-12 rounded-3xl overflow-hidden bg-stone-900 text-white border border-stone-800">
+        <div class="grid lg:grid-cols-2">
+          <div class="p-6 sm:p-10 flex flex-col justify-center">
+            <span class="inline-flex items-center gap-2 self-start text-xs font-bold uppercase tracking-widest bg-orange-600 px-3 py-1.5 rounded-full">
+              ★ Highlight range
+            </span>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold mt-5 leading-tight">
+              Curry &amp; Kuli Kuli &mdash; our proudest exports
+            </h2>
+            <p class="mt-3 text-stone-300 leading-relaxed text-sm sm:text-base">
+              Stone-ground Nigerian curry powder and protein-rich kuli kuli, packed beside our staples:
+              parboiled rice, red palm oil and stone-filtered groundnut oil. Bulk containers or retail packs &mdash; priced in Naira.
+            </p>
+
+            <div class="flex flex-wrap gap-2 mt-5">
+              <template x-for="name in ['Curry Powder', 'Kuli Kuli', 'Parboiled Rice', 'Palm Oil', 'Groundnut Oil']" :key="name">
+                <span class="text-xs font-semibold bg-white/10 border border-white/15 px-3 py-1.5 rounded-full text-amber-200" x-text="name"></span>
+              </template>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mt-7">
+              <button @click="activeCategory = 'exports'; activeTab = 'shop'" class="bg-orange-600 hover:bg-orange-700 active:scale-95 transition font-bold px-5 py-3 rounded-full text-sm">Order export staples</button>
+              <button @click="addFeaturedBundle()" class="bg-white/10 hover:opacity-90 border border-white/20 transition font-bold px-5 py-3 rounded-full text-sm">Add curry + kuli kuli bundle &middot; &#8358;7,900</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 p-4 sm:p-6">
+            <div class="rounded-2xl overflow-hidden bg-orange-900/40 aspect-square ring-1 ring-white/10">
+              <img src="assets/curry.png" alt="Nigerian curry powder" class="w-full h-full object-cover">
+            </div>
+            <div class="rounded-2xl overflow-hidden bg-amber-900/40 aspect-square ring-1 ring-white/10">
+              <img src="assets/kulikuli.png" alt="Kuli kuli groundnut cake" class="w-full h-full object-cover">
+            </div>
+            <div class="rounded-2xl overflow-hidden bg-stone-800 aspect-square ring-1 ring-white/10">
+              <img src="assets/palmoil.png" alt="Red palm oil" class="w-full h-full object-cover">
+            </div>
+            <div class="rounded-2xl overflow-hidden bg-stone-800 aspect-square ring-1 ring-white/10">
+              <img src="assets/groundnut-oil.png" alt="Groundnut oil" class="w-full h-full object-cover">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BESTSELLERS -->
+      <div class="mt-12">
+        <div class="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-orange-700">Loved by our buyers</p>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-1">Bestsellers this week</h2>
+          </div>
+          <button @click="activeTab = 'shop'" class="text-sm font-bold text-orange-700 hover:text-orange-800 underline underline-offset-4">View all products &rarr;</button>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+          <template x-for="p in featuredProducts" :key="'f' + p.id">
+            <article class="bg-white rounded-2xl border border-amber-200 overflow-hidden hover:shadow-xl transition group flex flex-col"
+                     :class="p.highlight ? 'ring-2 ring-orange-400' : ''">
+              <div class="relative h-44 bg-gradient-to-br from-amber-50 to-orange-100 overflow-hidden">
+                <template x-if="p.img">
+                  <img :src="p.img" :alt="p.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                </template>
+                <template x-if="!p.img">
+                  <div class="w-full h-full flex items-center justify-center" x-html="productArt(p.art)"></div>
+                </template>
+                <span x-show="p.badge" x-text="p.badge"
+                  class="absolute top-3 left-3 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                  :class="p.highlight ? 'bg-orange-600 text-white' : 'bg-white/90 text-orange-700 border border-orange-200'"></span>
+                <span x-show="p.highlight" class="absolute top-3 right-3 text-xs font-bold uppercase tracking-widest bg-amber-300 text-stone-900 px-2.5 py-1 rounded-full">★ Pick</span>
+              </div>
+
+              <div class="p-4 flex flex-col grow">
+                <p class="text-xs uppercase tracking-widest font-bold text-stone-400" x-text="categoryLabel(p.category)"></p>
+                <h3 class="font-display font-bold text-lg text-stone-900 leading-snug mt-1 line-clamp-2" x-text="p.name"></h3>
+                <p class="text-xs text-stone-500 mt-1" x-text="p.unit + ' · ' + p.origin"></p>
+
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-amber-100">
+                  <div>
+                    <p class="text-xl font-bold text-orange-700" x-text="naira(p.price)"></p>
+                    <p class="text-xs text-stone-400" x-text="'incl. VAT · ' + p.stock + ' in stock'"></p>
+                  </div>
+                  <button @click="addToBasket(p)"
+                    class="bg-stone-900 hover:bg-orange-600 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-full transition">
+                    Add +
+                  </button>
+                </div>
+              </div>
+            </article>
+          </template>
+        </div>
+      </div>
+
+      <!-- STORY / EXPORT STRIP -->
+      <div class="mt-12 grid lg:grid-cols-3 gap-5">
+        <div class="lg:col-span-2 bg-white rounded-3xl border border-amber-200 p-6 sm:p-9 relative overflow-hidden">
+          <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-amber-100"></div>
+          <div class="relative">
+            <p class="text-xs font-bold uppercase tracking-widest text-orange-700">Our promise</p>
+            <h2 class="font-display text-3xl font-bold text-stone-900 mt-2 leading-tight">From Kano farms to your doorstep &mdash; and to Rotterdam, Houston and Accra.</h2>
+            <p class="text-stone-600 mt-3 leading-relaxed text-sm sm:text-base">
+              Every batch is hand-sorted, sun-dried and sealed within 48 hours of order confirmation. Transparent Naira invoices,
+              NAFDAC-compliant packaging and real-time dispatch updates for every buyer.
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p class="text-2xl font-bold text-stone-900">48h</p><p class="text-xs text-stone-500">Avg. dispatch</p>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p class="text-2xl font-bold text-stone-900">1.2k</p><p class="text-xs text-stone-500">Orders fulfilled</p>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p class="text-2xl font-bold text-stone-900">98%</p><p class="text-xs text-stone-500">Reorder rate</p>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                <p class="text-2xl font-bold text-stone-900">14</p><p class="text-xs text-stone-500">Countries served</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-amber-200">Wholesale &amp; export</p>
+            <h3 class="font-display text-2xl font-bold mt-2 leading-snug">Need a container quotation?</h3>
+            <p class="text-white/85 text-sm mt-2 leading-relaxed">Tell us the volume and destination &mdash; we reply with a Naira quote within one business day.</p>
+          </div>
+          <button @click="openOrderModal('Wholesale / Export enquiry')" class="mt-6 bg-white text-orange-700 hover:bg-amber-100 active:scale-95 transition font-bold px-5 py-3 rounded-full text-sm self-start">
+            Request a quote
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ SHOP ══════════════════ -->
+    <section x-show="activeTab === 'shop'" x-transition.opacity class="mt-6 sm:mt-8">
+
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-orange-700">Shop</p>
+          <h1 class="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-1">Place your order</h1>
+          <p class="text-stone-500 text-sm mt-1">All prices in Naira (&#8358;) · add items to your basket, then check out.</p>
+        </div>
+        <div class="relative w-full sm:w-72">
+          <svg class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="text" x-model="searchQuery" placeholder="Search rice, curry, shea..."
+            class="w-full bg-white border border-amber-200 rounded-full pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2 mt-6">
+        <template x-for="c in categories" :key="c.id">
+          <button @click="activeCategory = c.id"
+            :class="activeCategory === c.id ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-stone-600 border-amber-200 hover:border-orange-300 hover:text-orange-700'"
+            class="px-4 py-2 rounded-full text-sm font-semibold border transition flex items-center gap-2">
+            <span x-text="c.label"></span>
+            <span class="text-xs opacity-70" x-text="'(' + countFor(c.id) + ')'"></span>
+          </button>
+        </template>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6 items-start">
+        <!-- Product grid -->
+        <div class="lg:col-span-2">
+          <div class="grid sm:grid-cols-2 gap-5">
+            <template x-for="p in filteredProducts" :key="'s' + p.id">
+              <article class="bg-white rounded-2xl border border-amber-200 overflow-hidden hover:shadow-xl transition flex flex-col"
+                       :class="p.highlight ? 'ring-2 ring-orange-400' : ''">
+                <div class="relative h-40 bg-gradient-to-br from-amber-50 to-orange-100 overflow-hidden">
+                  <template x-if="p.img">
+                    <img :src="p.img" :alt="p.name" class="w-full h-full object-cover">
+                  </template>
+                  <template x-if="!p.img">
+                    <div class="w-full h-full flex items-center justify-center" x-html="productArt(p.art)"></div>
+                  </template>
+                  <span x-show="p.badge" x-text="p.badge"
+                    class="absolute top-3 left-3 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/90 text-orange-700 border border-orange-200"></span>
+                </div>
+                <div class="p-4 flex flex-col grow">
+                  <p class="text-xs uppercase tracking-widest font-bold text-stone-400" x-text="categoryLabel(p.category)"></p>
+                  <h3 class="font-display font-bold text-base text-stone-900 leading-snug mt-1 line-clamp-2" x-text="p.name"></h3>
+                  <p class="text-xs text-stone-500 mt-1" x-text="p.unit"></p>
+                  <div class="flex items-center justify-between mt-auto pt-3">
+                    <p class="text-lg font-bold text-orange-700" x-text="naira(p.price)"></p>
+                    <div class="flex items-center gap-2">
+                      <div class="flex items-center bg-amber-50 border border-amber-200 rounded-full">
+                        <button @click="p.qty = Math.max(1, p.qty - 1)" class="w-7 h-7 flex items-center justify-center text-stone-600 hover:text-orange-700 font-bold">&minus;</button>
+                        <span class="text-xs font-bold w-5 text-center" x-text="p.qty"></span>
+                        <button @click="p.qty = p.qty + 1" class="w-7 h-7 flex items-center justify-center text-stone-600 hover:text-orange-700 font-bold">+</button>
+                      </div>
+                      <button @click="addToBasket(p)" class="bg-orange-600 hover:bg-orange-700 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-full transition">Add</button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </template>
+          </div>
+
+          <div x-show="filteredProducts.length === 0" class="bg-white border border-dashed border-amber-300 rounded-2xl p-10 text-center">
+            <p class="font-display text-xl font-bold text-stone-800">No products match that search</p>
+            <p class="text-sm text-stone-500 mt-1">Try &ldquo;curry&rdquo;, &ldquo;rice&rdquo; or &ldquo;shea&rdquo;.</p>
+            <button @click="searchQuery = ''; activeCategory = 'all'" class="mt-4 bg-stone-900 text-white text-sm font-bold px-5 py-2.5 rounded-full">Reset filters</button>
+          </div>
+        </div>
+
+        <!-- Basket panel -->
+        <aside class="lg:sticky top-24 bg-white rounded-3xl border-2 border-orange-200 overflow-hidden">
+          <div class="bg-gradient-to-br from-orange-500 to-amber-600 text-white px-5 py-4 flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-widest text-amber-200 font-bold">Your basket</p>
+              <p class="font-display text-lg font-bold" x-text="basketCount + ' item' + (basketCount === 1 ? '' : 's')"></p>
+            </div>
+            <button x-show="basket.length" @click="clearBasket()" class="text-xs font-bold bg-white/15 hover:opacity-90 border border-white/20 px-3 py-1.5 rounded-full transition">Clear</button>
+          </div>
+
+          <div class="p-4 space-y-3 max-h-72 overflow-y-auto">
+            <template x-for="item in basket" :key="'b' + item.id">
+              <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-2.5">
+                <div class="w-11 h-11 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 border border-amber-100">
+                  <template x-if="item.img">
+                    <img :src="item.img" :alt="item.name" class="w-full h-full object-cover">
+                  </template>
+                  <template x-if="!item.img">
+                    <div class="scale-50" x-html="productArt(item.art)"></div>
+                  </template>
+                </div>
+                <div class="min-w-0 grow">
+                  <p class="text-xs font-bold text-stone-800 line-clamp-1" x-text="item.name"></p>
+                  <p class="text-xs text-orange-700 font-semibold" x-text="naira(item.price * item.qty)"></p>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button @click="changeQty(item.id, -1)" class="w-6 h-6 rounded-full bg-white border border-amber-200 text-stone-600 text-xs font-bold hover:border-orange-300">&minus;</button>
+                  <span class="text-xs font-bold w-4 text-center" x-text="item.qty"></span>
+                  <button @click="changeQty(item.id, 1)" class="w-6 h-6 rounded-full bg-white border border-amber-200 text-stone-600 text-xs font-bold hover:border-orange-300">+</button>
+                </div>
+                <button @click="removeFromBasket(item.id)" class="text-stone-400 hover:text-red-600 shrink-0" aria-label="Remove">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+              </div>
+            </template>
+
+            <div x-show="basket.length === 0" class="text-center py-6">
+              <svg class="w-10 h-10 mx-auto text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+              <p class="text-sm text-stone-500 mt-2">Basket is empty.</p>
+              <p class="text-xs text-stone-400">Start with our curry &amp; kuli kuli.</p>
+            </div>
+          </div>
+
+          <div class="border-t border-amber-200 p-4 bg-amber-50/60 space-y-2 text-sm">
+            <div class="flex justify-between text-stone-500"><span>Subtotal</span><span x-text="naira(basketTotal)"></span></div>
+            <div class="flex justify-between text-stone-500"><span>Delivery</span><span x-text="basketTotal >= 150000 ? 'Free' : naira(2500)"></span></div>
+            <div class="flex justify-between font-bold text-stone-900 text-base pt-2 border-t border-amber-200">
+              <span>Total</span><span x-text="naira(orderTotal)"></span>
+            </div>
+            <button @click="openOrderModal()" :disabled="basket.length === 0"
+              :class="basket.length === 0 ? 'bg-stone-300 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700 active:scale-95'"
+              class="w-full text-white font-bold py-3.5 rounded-full transition mt-2">
+              Checkout &amp; place order
+            </button>
+            <p class="text-xs text-stone-500 text-center">Pay by transfer, card or on delivery.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ══════════════════ ORDERS ══════════════════ -->
+    <section x-show="activeTab === 'orders'" x-transition.opacity class="mt-6 sm:mt-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-orange-700">Order desk</p>
+          <h1 class="font-display text-3xl sm:text-4xl font-bold text-stone-900 mt-1">Recent orders</h1>
+          <p class="text-stone-500 text-sm mt-1">Live status for every order placed on the platform.</p>
+        </div>
+        <button @click="openOrderModal()" class="bg-orange-600 hover:bg-orange-700 active:scale-95 text-white font-bold px-5 py-3 rounded-full text-sm transition self-start">
+          + New order
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div class="bg-white rounded-2xl border border-amber-200 p-4">
+          <p class="text-2xl font-bold text-stone-900" x-text="orders.length"></p><p class="text-xs text-stone-500 mt-1">Total orders</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-amber-200 p-4">
+          <p class="text-2xl font-bold text-amber-700" x-text="countStatus('Pending')"></p><p class="text-xs text-stone-500 mt-1">Awaiting confirmation</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-amber-200 p-4">
+          <p class="text-2xl font-bold text-orange-700" x-text="countStatus('Packing') + countStatus('In Transit')"></p><p class="text-xs text-stone-500 mt-1">In fulfilment</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-amber-200 p-4">
+          <p class="text-2xl font-bold text-emerald-700" x-text="naira(ordersValue)"></p><p class="text-xs text-stone-500 mt-1">Pipeline value</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mt-6">
+        <template x-for="s in statusFilters" :key="s">
+          <button @click="statusFilter = s"
+            :class="statusFilter === s ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-600 border-amber-200 hover:border-orange-300'"
+            class="px-4 py-2 rounded-full text-sm font-semibold border transition" x-text="s === 'all' ? 'All orders' : s"></button>
+        </template>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-amber-200 overflow-hidden mt-5">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm min-w-max">
+            <thead>
+              <tr class="bg-amber-50 text-left text-xs uppercase tracking-widest text-stone-500">
+                <th class="px-5 py-3.5 font-bold">Order</th>
+                <th class="px-5 py-3.5 font-bold">Customer</th>
+                <th class="px-5 py-3.5 font-bold">Destination</th>
+                <th class="px-5 py-3.5 font-bold">Items</th>
+                <th class="px-5 py-3.5 font-bold">Total</th>
+                <th class="px-5 py-3.5 font-bold">Status</th>
+                <th class="px-5 py-3.5 font-bold text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-amber-100">
+              <template x-for="o in filteredOrders" :key="o.id">
+                <tr class="hover:bg-amber-100 transition">
+                  <td class="px-5 py-4">
+                    <p class="font-bold text-stone-900" x-text="o.id"></p>
+                    <p class="text-xs text-stone-400" x-text="o.date"></p>
+                  </td>
+                  <td class="px-5 py-4">
+                    <p class="font-semibold text-stone-800" x-text="o.customer"></p>
+                    <p class="text-xs text-stone-400" x-text="o.phone"></p>
+                  </td>
+                  <td class="px-5 py-4 text-stone-600" x-text="o.destination"></td>
+                  <td class="px-5 py-4 text-stone-600" x-text="o.items + ' · ' + o.summary"></td>
+                  <td class="px-5 py-4 font-bold text-stone-900" x-text="naira(o.total)"></td>
+                  <td class="px-5 py-4">
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full border" x-text="o.status" :class="statusClass(o.status)"></span>
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <button @click="advanceStatus(o)" class="text-xs font-bold text-orange-700 hover:text-orange-800 underline underline-offset-4">
+                      Advance &rarr;
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <div x-show="filteredOrders.length === 0" class="p-10 text-center">
+          <p class="font-display text-xl font-bold text-stone-800">No orders in this state</p>
+          <p class="text-sm text-stone-500 mt-1">Pick another status or place a new order.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer class="bg-stone-900 text-stone-300 mt-10">
+    <div class="max-w-7xl mx-auto px-4 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-orange-500 bg-amber-100">
+            <img src="assets/client-logo.png" alt="Zarabid Emporium" class="w-full h-full object-cover">
+          </span>
+          <span class="font-display text-lg font-bold text-white">Zarabid Emporium</span>
+        </div>
+        <p class="text-sm mt-4 leading-relaxed text-stone-400">Natural skincare, organic supplements and premium Nigerian food exports. All transactions priced in Naira.</p>
+      </div>
+
+      <div>
+        <p class="text-white font-bold text-sm uppercase tracking-widest">Departments</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><button @click="activeCategory = 'skincare'; activeTab = 'shop'" class="hover:text-orange-400">Natural skincare</button></li>
+          <li><button @click="activeCategory = 'supplements'; activeTab = 'shop'" class="hover:text-orange-400">Organic supplements</button></li>
+          <li><button @click="activeCategory = 'exports'; activeTab = 'shop'" class="hover:text-orange-400">Food exports — rice &amp; oils</button></li>
+          <li><button @click="activeCategory = 'exports'; activeTab = 'shop'" class="hover:text-orange-400 text-amber-300 font-semibold">Curry &amp; kuli kuli</button></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-white font-bold text-sm uppercase tracking-widest">Company</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><button @click="activeTab = 'home'" class="hover:text-orange-400">Home</button></li>
+          <li><button @click="activeTab = 'orders'" class="hover:text-orange-400">Track an order</button></li>
+          <li><button @click="openOrderModal('Wholesale / Export enquiry')" class="hover:text-orange-400">Wholesale enquiry</button></li>
+          <li><span class="text-stone-500">Mon–Sat, 8am–6pm WAT</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-white font-bold text-sm uppercase tracking-widest">Order updates</p>
+        <p class="text-sm mt-4 text-stone-400">Get harvest drops and export restocks.</p>
+        <form @submit.prevent="subscribe()" class="mt-3 flex gap-2">
+          <input type="email" x-model="newsletterEmail" required placeholder="you@email.com"
+            class="grow min-w-0 bg-stone-800 border border-stone-700 rounded-full px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500">
+          <button class="bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold px-4 py-2.5 rounded-full">Join</button>
+        </form>
+        <p class="text-xs mt-4 text-stone-500">hello@zarabidemporium.ng · +234 801 234 5678<br>Kano &amp; Lagos, Nigeria</p>
+      </div>
+    </div>
+    <div class="border-t border-stone-800">
+      <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-stone-500">
+        <p>© 2026 Zarabid Emporium Ltd. RC 1489203.</p>
+        <p>Prices in Nigerian Naira (&#8358;) · Prototype demo</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ══════════ ORDER MODAL ══════════ -->
+  <div x-show="isOrderModalOpen" x-cloak class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6">
+    <div x-show="isOrderModalOpen" x-transition.opacity @click="isOrderModalOpen = false" class="absolute inset-0 bg-stone-900/80 backdrop-blur-sm"></div>
+
+    <div x-show="isOrderModalOpen" x-transition
+      class="relative w-full sm:max-w-2xl max-h-full overflow-y-auto bg-white rounded-t-3xl sm:rounded-3xl border border-amber-200 shadow-2xl">
+
+      <div class="sticky top-0 bg-gradient-to-br from-orange-500 to-amber-600 text-white px-6 py-5 flex items-start justify-between gap-4 z-10">
+        <div>
+          <p class="text-xs uppercase tracking-widest text-amber-200 font-bold">Checkout</p>
+          <h2 class="font-display text-2xl font-bold">Place your order</h2>
+          <p class="text-xs text-white/85 mt-1" x-text="basketCount + ' item(s) · ' + naira(orderTotal) + ' total'"></p>
+        </div>
+        <button @click="isOrderModalOpen = false" class="bg-white/15 hover:opacity-90 border border-white/20 rounded-full p-2 transition" aria-label="Close">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 grid sm:grid-cols-2 gap-4">
+        <label class="block sm:col-span-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Full name *</span>
+          <input type="text" x-model="orderForm.name" placeholder="e.g. Adaeze Nwosu"
+            class="mt-1.5 w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+        </label>
+
+        <label class="block">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Phone *</span>
+          <input type="tel" x-model="orderForm.phone" placeholder="+234 801 234 5678"
+            class="mt-1.5 w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+        </label>
+
+        <label class="block">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Email</span>
+          <input type="email" x-model="orderForm.email" placeholder="you@email.com"
+            class="mt-1.5 w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+        </label>
+
+        <label class="block sm:col-span-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Delivery destination *</span>
+          <select x-model="orderForm.destination"
+            class="mt-1.5 w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+            <optgroup label="Nigeria">
+              <option>Lagos, Nigeria</option><option>Abuja, Nigeria</option><option>Kano, Nigeria</option>
+              <option>Ibadan, Nigeria</option><option>Port Harcourt, Nigeria</option>
+            </optgroup>
+            <optgroup label="Export">
+              <option>London, United Kingdom</option><option>Houston, USA</option>
+              <option>Toronto, Canada</option><option>Accra, Ghana</option><option>Dubai, UAE</option>
+            </optgroup>
+          </select>
+        </label>
+
+        <label class="block sm:col-span-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Street address / warehouse</span>
+          <input type="text" x-model="orderForm.address" placeholder="14 Marina Street, Lagos Island"
+            class="mt-1.5 w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+        </label>
+
+        <div class="sm:col-span-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Payment method</span>
+          <div class="grid grid-cols-3 gap-2 mt-1.5">
+            <template x-for="m in ['Bank Transfer', 'Card / USSD', 'Pay on Delivery']" :key="m">
+              <button type="button" @click="orderForm.payment = m"
+                :class="orderForm.payment === m ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-stone-600 border-amber-200 hover:border-orange-300'"
+                class="border rounded-xl px-2 py-3 text-xs font-bold transition" x-text="m"></button>
+            </template>
+          </div>
+        </div>
+
+        <label class="block sm:col-span-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-stone-500">Order notes</span>
+          <textarea x-model="orderForm.note" rows="2" placeholder="Packaging, palletising or delivery instructions…"
+            class="mt-1.5 w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition"></textarea>
+        </label>
+
+        <!-- Summary -->
+        <div class="sm:col-span-2 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <p class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-2">Order summary</p>
+          <div class="space-y-1.5 text-sm max-h-32 overflow-y-auto">
+            <template x-for="item in basket" :key="'m' + item.id">
+              <div class="flex justify-between gap-3 text-stone-600">
+                <span class="truncate" x-text="item.qty + ' × ' + item.name"></span>
+                <span class="font-semibold shrink-0" x-text="naira(item.price * item.qty)"></span>
+              </div>
+            </template>
+            <div x-show="basket.length === 0" class="text-xs text-stone-500">Basket is empty — close this window and add products first.</div>
+          </div>
+          <div class="flex justify-between text-sm text-stone-500 mt-3 pt-3 border-t border-amber-200">
+            <span>Delivery</span><span x-text="basketTotal >= 150000 ? 'Free' : naira(2500)"></span>
+          </div>
+          <div class="flex justify-between font-bold text-stone-900 mt-1 text-lg">
+            <span>Total (NGN)</span><span x-text="naira(orderTotal)"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky bottom-0 bg-white border-t border-amber-200 px-6 py-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <p class="text-xs text-stone-500">A confirmation will be sent by SMS within 10 minutes.</p>
+        <div class="flex gap-2">
+          <button @click="isOrderModalOpen = false" class="flex-1 sm:flex-none bg-amber-100 hover:bg-amber-200 text-stone-700 font-bold px-5 py-3 rounded-full text-sm transition">Cancel</button>
+          <button @click="placeOrder()" class="flex-1 sm:flex-none bg-orange-600 hover:bg-orange-700 active:scale-95 text-white font-bold px-6 py-3 rounded-full text-sm transition shadow">
+            Confirm order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ TOAST ══════════ -->
+  <div x-show="showToast" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-200" x-transition:leave-end="opacity-0 translate-y-4"
+        class="fixed inset-0 z-50 p-4 flex items-end justify-center sm:justify-end pointer-events-none">
+    <div class="w-full sm:w-96 pointer-events-auto flex items-start gap-3 rounded-2xl shadow-2xl px-4 py-3.5 border"
+         :class="toastType === 'warning' ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-stone-900 border-stone-700 text-white'">
+      <span class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5"
+            :class="toastType === 'warning' ? 'bg-amber-400 text-stone-900' : 'bg-emerald-500 text-white'">
+        <svg x-show="toastType !== 'warning'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+        <svg x-show="toastType === 'warning'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.9L2.5 18a2 2 0 001.7 3h15.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+      </span>
+      <div class="grow">
+        <p class="text-sm font-bold" x-text="toastType === 'warning' ? 'Heads up' : 'Success'"></p>
+        <p class="text-sm opacity-90" x-text="toastMessage"></p>
+      </div>
+      <button @click="showToast = false" class="opacity-60 hover:opacity-100" aria-label="Dismiss">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════ FLOATING CHECKOUT (mobile) ══════════ -->
+  <div x-show="basketCount > 0 && activeTab !== 'orders'" x-cloak x-transition
+       class="sm:hidden fixed bottom-0 inset-x-0 z-40 p-3 bg-white/95 backdrop-blur border-t border-amber-200">
+    <button @click="openOrderModal()" class="w-full bg-orange-600 text-white font-bold py-3.5 rounded-full text-sm shadow-lg flex items-center justify-center gap-2">
+      <span x-text="'Checkout · ' + basketCount + ' item(s)'"></span>
+      <span class="bg-white/20 px-2 py-0.5 rounded-full" x-text="naira(orderTotal)"></span>
+    </button>
+  </div>
+
+  <script>
+    function demoApp() {
+      return {
+        /* ---------- state ---------- */
+        activeTab: 'home',
+        mobileMenuOpen: false,
+        isOrderModalOpen: false,
+        showToast: false,
+        toastMessage: '',
+        toastType: 'success',
+        searchQuery: '',
+        activeCategory: 'all',
+        statusFilter: 'all',
+        newsletterEmail: '',
+        basket: [],
+
+        tabs: [
+          { id: 'home', label: 'Home' },
+          { id: 'shop', label: 'Shop' },
+          { id: 'orders', label: 'Orders' }
+        ],
+
+        categories: [
+          { id: 'all', label: 'All products' },
+          { id: 'exports', label: 'Food exports' },
+          { id: 'skincare', label: 'Skincare' },
+          { id: 'supplements', label: 'Supplements' }
+        ],
+
+        statusFilters: ['all', 'Pending', 'Packing', 'In Transit', 'Delivered'],
+
+        orderForm: {
+          name: '',
+          phone: '',
+          email: '',
+          address: '',
+          destination: 'Lagos, Nigeria',
+          payment: 'Bank Transfer',
+          note: ''
+        },
+
+        products: [
+          /* ---- FOOD EXPORTS (highlighted) ---- */
+          { id: 1,  name: 'Stone-Ground Curry Powder 500g', category: 'exports', price: 4800,  unit: '500g pack', origin: 'Kano, NG', img: 'assets/curry.png',        art: '',        badge: 'Bestseller', highlight: true,  featured: true,  qty: 1, stock: 240 },
+          { id: 2,  name: 'Crunchy Kuli Kuli Sticks 500g',  category: 'exports', price: 3900,  unit: '500g pack', origin: 'Kano, NG', img: 'assets/kulikuli.png',      art: '',        badge: 'Bestseller', highlight: true,  featured: true,  qty: 1, stock: 186 },
+          { id: 3,  name: 'Premium Parboiled Rice 5kg',     category: 'exports', price: 18500, unit: '5kg bag',   origin: 'Jigawa, NG', img: '',                       art: 'rice',    badge: 'Export grade', highlight: true, featured: true, qty: 1, stock: 92 },
+          { id: 4,  name: 'Unrefined Red Palm Oil 1L',      category: 'exports', price: 7200,  unit: '1L bottle', origin: 'Delta, NG', img: 'assets/palmoil.png',      art: '',        badge: 'Export grade', highlight: true, featured: true,  qty: 1, stock: 130 },
+          { id: 5,  name: 'Stone-Filtered Groundnut Oil 1L',category: 'exports', price: 6900,  unit: '1L bottle', origin: 'Kano, NG', img: 'assets/groundnut-oil.png', art: '',        badge: 'Export grade', highlight: true, featured: true,  qty: 1, stock: 164 },
+          { id: 6,  name: 'Stone-Ground Maize Flour 2kg',    category: 'exports', price: 5400,  unit: '2kg pack',  origin: 'Kaduna, NG', img: 'assets/maize-flour.png',  art: '',        badge: '',           highlight: false, featured: false, qty: 1, stock: 75 },
+
+          /* ---- SKINCARE ---- */
+          { id: 7,  name: 'Raw Shea Butter Whip 250g',       category: 'skincare', price: 6500, unit: '250g jar',  origin: 'Niger State, NG', img: '',                     art: 'jar',   badge: 'Handmade', highlight: false, featured: true,  qty: 1, stock: 58 },
+          { id: 8,  name: 'African Black Soap 150g',        category: 'skincare', price: 4200, unit: '150g bar',  origin: 'Ogun State, NG', img: '',                      art: 'soap',  badge: '',        highlight: false, featured: false, qty: 1, stock: 120 },
+          { id: 9,  name: 'Virgin Coconut Glow Oil 100ml',  category: 'skincare', price: 8900, unit: '100ml',     origin: 'Lagos, NG', img: '',                        art: 'bottle',badge: 'New',     highlight: false, featured: false, qty: 1, stock: 44 },
+
+          /* ---- SUPPLEMENTS ---- */
+          { id: 10, name: 'Moringa Capsules · 60 caps',     category: 'supplements', price: 9500, unit: '60 capsules', origin: 'Niger State, NG', img: 'assets/supplement1.png', art: '', badge: 'Organic', highlight: false, featured: false, qty: 1, stock: 88 },
+          { id: 11, name: 'Organic Herbal Wellness Tea',    category: 'supplements', price: 5800, unit: '30 tea bags', origin: 'Plateau, NG', img: 'assets/organic-tea.png',  art: '', badge: 'Organic', highlight: false, featured: false, qty: 1, stock: 102 }
+        ],
+
+        orders: [
+          { id: 'ZR-4821', customer: 'Chidinma Okafor',   phone: '+234 803 114 9920', destination: 'Lagos, Nigeria',        items: 3, summary: 'Curry, Kuli Kuli, Rice', total: 27200, status: 'Pending',    date: '07 Oct 2026' },
+          { id: 'ZR-4818', customer: 'Adebayo Stores Ltd',phone: '+234 809 552 0031', destination: 'London, United Kingdom', items: 24, summary: 'Bulk oils & curry',    total: 318500, status: 'Packing',    date: '07 Oct 2026' },
+          { id: 'ZR-4809', customer: 'Grace Mensah',      phone: '+233 24 771 8842',  destination: 'Accra, Ghana',           items: 5, summary: 'Rice & palm oil',       total: 76900,  status: 'In Transit', date: '06 Oct 2026' },
+          { id: 'ZR-4796', customer: 'Sunrise Grocers',   phone: '+234 706 220 4417', destination: 'Kano, Nigeria',          items: 24, summary: 'Groundnut oil ×24',     total: 612400, status: 'Delivered',  date: '04 Oct 2026' },
+          { id: 'ZR-4790', customer: 'Hauwa Bello',       phone: '+234 812 908 3376', destination: 'Abuja, Nigeria',         items: 2, summary: 'Shea whip, tea',        total: 18700,  status: 'Pending',    date: '04 Oct 2026' }
+        ],
+
+        /* ---------- computed ---------- */
+        get featuredProducts() {
+          return this.products.filter(p => p.featured);
+        },
+        get filteredProducts() {
+          const q = this.searchQuery.trim().toLowerCase();
+          return this.products.filter(p => {
+            const inCat = this.activeCategory === 'all' || p.category === this.activeCategory;
+            const inSearch = !q || p.name.toLowerCase().includes(q) || p.category.includes(q) || p.origin.toLowerCase().includes(q);
+            return inCat && inSearch;
+          });
+        },
+        get filteredOrders() {
+          return this.statusFilter === 'all' ? this.orders : this.orders.filter(o => o.status === this.statusFilter);
+        },
+        get basketCount() {
+          return this.basket.reduce((n, i) => n + i.qty, 0);
+        },
+        get basketTotal() {
+          return this.basket.reduce((n, i) => n + i.qty * i.price, 0);
+        },
+        get orderTotal() {
+          return this.basketTotal === 0 ? 0 : this.basketTotal + (this.basketTotal >= 150000 ? 0 : 2500);
+        },
+        get pendingCount() {
+          return this.orders.filter(o => o.status === 'Pending').length;
+        },
+        get ordersValue() {
+          return this.orders.reduce((n, o) => n + o.total, 0);
+        },
+
+        /* ---------- helpers ---------- */
+        naira(amount) {
+          return '\u20A6' + Number(amount || 0).toLocaleString('en-NG');
+        },
+        categoryLabel(cat) {
+          return { exports: 'Food exports', skincare: 'Natural skincare', supplements: 'Organic supplements' }[cat] || cat;
+        },
+        countFor(cat) {
+          return cat === 'all' ? this.products.length : this.products.filter(p => p.category === cat).length;
+        },
+        countStatus(status) {
+          return this.orders.filter(o => o.status === status).length;
+        },
+        statusClass(status) {
+          return {
+            'Pending':    'bg-amber-50 text-amber-800 border-amber-200',
+            'Packing':    'bg-sky-50 text-sky-700 border-sky-200',
+            'In Transit': 'bg-orange-50 text-orange-700 border-orange-200',
+            'Delivered':  'bg-emerald-50 text-emerald-700 border-emerald-200'
+          }[status] || 'bg-stone-100 text-stone-600 border-stone-200';
+        },
+        productArt(key) {
+          const open = '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="w-20 h-20 text-amber-800 opacity-90">';
+          const art = {
+            rice: '<path d="M12 34h40c0 11-9 19-20 19s-20-8-20-19z"/><path d="M16 34c3-5 9-8 16-8s13 3 16 8"/><ellipse cx="32" cy="25" rx="19" ry="6"/><path d="M25 23c2-3 6-4 8-2M35 21c3 0 5 2 5 4"/>',
+            jar:  '<path d="M18 26h28v20a8 8 0 0 1-8 8H26a8 8 0 0 1-8-8V26z"/><path d="M22 26v-5a10 10 0 0 1 20 0v5"/><path d="M20 35h24"/><path d="M27 43h10"/>',
+            soap: '<rect x="11" y="23" width="42" height="24" rx="9"/><path d="M20 32h9M35 38h9"/><path d="M32 23v24"/>',
+            bottle:'<path d="M27 10h10v7l6 9v22a5 5 0 0 1-5 5H26a5 5 0 0 1-5-5V26l6-9v-7z"/><path d="M21 34h22"/><path d="M28 14h8"/>'
+          };
+          return open + (art[key] || art.jar) + '</svg>';
+        },
+
+        /* ---------- actions ---------- */
+        triggerToast(msg, type) {
+          this.toastMessage = msg;
+          this.toastType = type || 'success';
+          this.showToast = true;
+          clearTimeout(this._toastTimer);
+          this._toastTimer = setTimeout(() => { this.showToast = false; }, 3200);
+        },
+        addToBasket(product) {
+          const existing = this.basket.find(i => i.id === product.id);
+          const qty = product.qty && product.qty > 0 ? product.qty : 1;
+          if (existing) {
+            existing.qty += qty;
+          } else {
+            this.basket.push({ id: product.id, name: product.name, price: product.price, img: product.img, art: product.art, qty: qty });
+          }
+          product.qty = 1;
+          this.triggerToast(qty + ' × ' + product.name + ' added to basket.');
+        },
+        addFeaturedBundle() {
+          const curry = this.products.find(p => p.id === 1);
+          const kuli  = this.products.find(p => p.id === 2);
+          [curry, kuli].forEach(p => {
+            const found = this.basket.find(i => i.id === p.id);
+            if (found) found.qty += 1;
+            else this.basket.push({ id: p.id, name: p.name, price: p.price, img: p.img, art: p.art, qty: 1 });
+          });
+          this.triggerToast('Curry + kuli kuli bundle added to basket.');
+          this.activeTab = 'shop';
+        },
+        changeQty(id, delta) {
+          const item = this.basket.find(i => i.id === id);
+          if (!item) return;
+          item.qty += delta;
+          if (item.qty <= 0) this.removeFromBasket(id);
+        },
+        removeFromBasket(id) {
+          const item = this.basket.find(i => i.id === id);
+          this.basket = this.basket.filter(i => i.id !== id);
+          if (item) this.triggerToast(item.name + ' removed.', 'warning');
+        },
+        clearBasket() {
+          this.basket = [];
+          this.triggerToast('Basket cleared.', 'warning');
+        },
+        openOrderModal(prefillNote) {
+          if (prefillNote) this.orderForm.note = prefillNote;
+          if (this.basket.length === 0 && !prefillNote) {
+            this.activeTab = 'shop';
+            this.triggerToast('Your basket is empty — add a product first.', 'warning');
+            return;
+          }
+          this.isOrderModalOpen = true;
+        },
+        placeOrder() {
+          if (this.basket.length === 0) {
+            this.triggerToast('Add at least one product before confirming.', 'warning');
+            return;
+          }
+          if (!this.orderForm.name.trim() || !this.orderForm.phone.trim()) {
+            this.triggerToast('Name and phone number are required.', 'warning');
+            return;
+          }
+          const seq = Math.floor(1000 + Math.random() * 9000);
+          const summary = this.basket.length === 1
+            ? this.basket[0].name
+            : this.basket[0].name.split(' ').slice(0, 2).join(' ') + ' +' + (this.basket.length - 1);
+
+          this.orders.unshift({
+            id: 'ZR-' + seq,
+            customer: this.orderForm.name.trim(),
+            phone: this.orderForm.phone.trim(),
+            destination: this.orderForm.destination,
+            items: this.basketCount,
+            summary: summary,
+            total: this.orderTotal,
+            status: 'Pending',
+            date: 'Today'
+          });
+
+          const total = this.naira(this.orderTotal);
+          const orderId = 'ZR-' + seq;
+          this.basket = [];
+          this.isOrderModalOpen = false;
+          this.orderForm = { name: '', phone: '', email: '', address: '', destination: 'Lagos, Nigeria', payment: 'Bank Transfer', note: '' };
+          this.activeTab = 'orders';
+          this.statusFilter = 'all';
+          this.triggerToast('Order ' + orderId + ' placed — ' + total + ' due. Confirmation sent by SMS.');
+        },
+        advanceStatus(o) {
+          const flow = ['Pending', 'Packing', 'In Transit', 'Delivered'];
+          const i = flow.indexOf(o.status);
+          if (i < flow.length - 1) {
+            o.status = flow[i + 1];
+            this.triggerToast(o.id + ' is now “' + o.status + '”.');
+          } else {
+            this.triggerToast(o.id + ' has already been delivered.', 'warning');
+          }
+        },
+        subscribe() {
+          this.triggerToast(this.newsletterEmail + ' subscribed to Zarabid updates.');
+          this.newsletterEmail = '';
+        }
+      };
+    }
+  </script>
+</body>
+</html>
