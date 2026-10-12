@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>003 — CAC Procurement Document Validator (Demo)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>CAC Certificate Validator <span class="pill">v1 demo</span></h1>
+    <p class="sub">Upload a CAC Certificate of Incorporation → QR + OCR cross-check → verdict. No persistence, no portal lookup.</p>
+  </header>
+
+  <main>
+    <section class="panel controls">
+      <div class="row api-row">
+        <label for="apiBase">API base</label>
+        <input id="apiBase" type="text" value="http://localhost:8000" spellcheck="false" />
+        <span id="healthDot" class="dot unknown" title="backend health">●</span>
+        <button id="healthBtn" type="button" class="ghost">Check</button>
+      </div>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Drop a CAC certificate image or click to choose">
+        <p><strong>Drop</strong> JPG / PNG / PDF here or <strong>click</strong> to choose (≤10MB)</p>
+        <p id="fileName" class="file-name">No file selected</p>
+        <input id="fileInput" type="file" accept=".jpg,.jpeg,.png,.pdf" hidden />
+      </div>
+
+      <div class="row sample-row">
+        <label for="sampleUrl">Sample</label>
+        <input id="sampleUrl" type="text" spellcheck="false"
+          value="https://icrp.cac.gov.ng/assets/img/site/e-certificate/CERTIFICATE%20-%20TEST%20FOUNDATION.jpg" />
+        <button id="loadSampleBtn" type="button" class="ghost">Load sample</button>
+      </div>
+
+      <div class="preview-wrap">
+        <img id="preview" alt="Document preview" />
+      </div>
+
+      <div class="row actions">
+        <button id="analyzeBtn" type="button" class="primary">Analyze</button>
+        <span id="elapsed" class="elapsed"></span>
+      </div>
+      <div id="error" class="error" role="alert" hidden></div>
+      <p class="hint">Tip: with no backend running, Analyze renders the frozen mock verdict so the UI is clickable.</p>
+    </section>
+
+    <section class="panel results" aria-live="polite">
+      <h2>Result</h2>
+      <div id="emptyState" class="empty">No analysis yet — choose a file or load the sample, then Analyze.</div>
+      <div id="resultBody" hidden>
+        <div class="verdict-row">
+          <span id="verdictBadge" class="badge">—</span>
+          <div class="conf">
+            <div class="conf-bar"><div id="confFill" class="conf-fill"></div></div>
+            <span id="confLabel" class="conf-label"></span>
+          </div>
+        </div>
+        <p id="sampleFlag" class="sample-flag" hidden>⚠ SAMPLE watermark detected — demo document, capped at Needs Review.</p>
+        <h3>Extracted fields</h3>
+        <table class="fields">
+          <tbody id="fieldsBody"></tbody>
+        </table>
+        <h3>QR payload</h3>
+        <pre id="qrBlock" class="qr"></pre>
+        <h3>Checks (VR-1…VR-7)</h3>
+        <ul id="checksList" class="checks"></ul>
+        <details>
+          <summary>Raw JSON</summary>
+          <pre id="rawJson" class="raw"></pre>
+        </details>
+        <p id="metaLine" class="meta"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Demo only — QR + OCR cross-check, no live CAC lookup. <code>doc_type=cac_incorporation</code>.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
