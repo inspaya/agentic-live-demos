@@ -1,0 +1,6 @@
+{
+  "title": "CAC Procurement Document Validator",
+  "description": "One-click workflow demo: upload a CAC Certificate of Incorporation — QR + OCR cross-check — verdict (Valid / Needs Review / Invalid). No persistence, no live CAC portal lookup.",
+  "thumbnail": "006_CAC_Procurement_Validator_2026_10_12.png",
+  "entry": "dist/index.html"
+}
