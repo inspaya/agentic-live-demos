@@ -1,0 +1,6 @@
+{
+  "title": "Mall Dash",
+  "description": "Zero-build arcade POC: drive a shopping cart through crowded mall aisles, collect a 5-item live checklist before a 75-second clock expires — NPC shopper crowds and wet-floor spills, floating score pop-ups, and a Checkout Line finish with time-bonus scoring. Randomized layout each run, fully offline.",
+  "thumbnail": "007_Mall_Dash_2026_10_16.png",
+  "entry": "dist/index.html"
+}
